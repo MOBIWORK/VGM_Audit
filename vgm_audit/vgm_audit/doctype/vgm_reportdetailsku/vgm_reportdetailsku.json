@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2024-02-19 09:58:00.659052",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "product",
+  "sum_product",
+  "images"
+ ],
+ "fields": [
+  {
+   "fieldname": "product",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Product",
+   "options": "VGM_Product"
+  },
+  {
+   "fieldname": "sum_product",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Sum Product"
+  },
+  {
+   "fieldname": "images",
+   "fieldtype": "JSON",
+   "label": "Images"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-02-19 09:58:00.659052",
+ "modified_by": "Administrator",
+ "module": "VGM-Audit",
+ "name": "VGM_ReportDetailSKU",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

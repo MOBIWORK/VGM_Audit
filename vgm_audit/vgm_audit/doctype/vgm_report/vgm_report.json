@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2024-02-19 09:54:15.605070",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "retail_code",
+  "campaign_code",
+  "employee_code",
+  "date_check_in",
+  "date_check_out",
+  "longitude_check_in",
+  "latitude_check_in",
+  "longitude_check_out",
+  "latitude_check_out",
+  "report_sku"
+ ],
+ "fields": [
+  {
+   "fieldname": "retail_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Retail Code"
+  },
+  {
+   "fieldname": "campaign_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Campaign Code",
+   "options": "VGM_Campaign"
+  },
+  {
+   "fieldname": "employee_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Code"
+  },
+  {
+   "fieldname": "date_check_in",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Date Check In"
+  },
+  {
+   "fieldname": "date_check_out",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Date Check Out"
+  },
+  {
+   "fieldname": "longitude_check_in",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Longitude Check In"
+  },
+  {
+   "fieldname": "latitude_check_in",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Latitude Check In"
+  },
+  {
+   "fieldname": "longitude_check_out",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Longitude Check Out"
+  },
+  {
+   "fieldname": "latitude_check_out",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Latitude Check Out"
+  },
+  {
+   "fieldname": "report_sku",
+   "fieldtype": "Table",
+   "label": "Report SKU",
+   "options": "VGM_ReportDetailSKU"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-02-19 09:59:33.717271",
+ "modified_by": "Administrator",
+ "module": "VGM-Audit",
+ "name": "VGM_Report",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
