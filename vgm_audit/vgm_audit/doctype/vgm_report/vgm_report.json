@@ -17,7 +17,8 @@
   "latitude_check_in",
   "longitude_check_out",
   "latitude_check_out",
-  "report_sku"
+  "report_sku",
+  "categories"
  ],
  "fields": [
   {
@@ -80,11 +81,16 @@
    "fieldtype": "Table",
    "label": "Report SKU",
    "options": "VGM_ReportDetailSKU"
+  },
+  {
+   "fieldname": "categories",
+   "fieldtype": "JSON",
+   "label": "Categories"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-19 09:59:33.717271",
+ "modified": "2024-02-20 09:01:31.957304",
  "modified_by": "Administrator",
  "module": "VGM-Audit",
  "name": "VGM_Report",
