@@ -58,10 +58,10 @@ class VGM_Product(Document):
                 images_dict = json.loads(json_string)
                 base_url = frappe.utils.get_request_site_address()
                 image_paths = [base_url + value for value in images_dict.values()]
-                print(image_paths)
+                # print(image_paths)
                 image_ids = [str(uuid.uuid4())]
                 response = products.add(collection_name, product_id_ai, self.product_name, image_ids, image_paths)
-                print(response)
+                # print(response)
                 if response.get('status') == 'completed':
                     pass
                 else:
