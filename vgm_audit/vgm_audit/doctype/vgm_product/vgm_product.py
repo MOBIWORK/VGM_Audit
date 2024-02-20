@@ -29,7 +29,7 @@ class VGM_Product(Document):
         RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
         deep_vision: DeepVision = DeepVision()
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(RECOGNITION_API_KEY)
-        collection_name = 'VGM_Audits_Product'
+        collection_name = self.category
         custom_field = json.loads(self.get('custom_field'))
         if custom_field is None:
             self.check_and_add_product()
@@ -39,21 +39,6 @@ class VGM_Product(Document):
                 self.check_and_add_product()
             else:
                 products: Products = product_recognition.get_products()
-                products.update_by_id(collection_name, product_id_ai, self.product_name)
-                # # Lien he tac gia de hieu chi tiet
-                # imageSourceDBs = frappe.get_all("ProductImage_SKU", filters={"parent": self.name}, fields=["custom_field", "name", "uri_image"])
-                # for index, photo in enumerate(self.photos):
-                #     if not hasattr(photo, "custom_field") or photo.custom_field is None:
-                #         # photo["custom_field"] = "your_value"
-                #         image_ids = [str(uuid.uuid4())]
-                #         base_url = frappe.utils.get_request_site_address()
-                #         image_paths = [base_url + photo.uri_image]
-                #         response = products.add(collection_name, product_id_ai, self.product_name, image_ids, image_paths)
-                #         if response.get('status') == 'completed':
-                #             custom_field_image = json.dumps({"image_id": image_ids[0], "product_id": product_id_ai})
-                #             photo.set('custom_field', custom_field_image)
-                #         else:
-                #             frappe.msgprint("Không phân tích được ảnh")
                 json_string = self.images
                 images_dict = json.loads(json_string)
                 base_url = frappe.utils.get_request_site_address()
@@ -61,6 +46,7 @@ class VGM_Product(Document):
                 # print(image_paths)
                 image_ids = [str(uuid.uuid4())]
                 response = products.add(collection_name, product_id_ai, self.product_name, image_ids, image_paths)
+                products.update_by_id(collection_name, product_id_ai, self.product_name)
                 # print(response)
                 if response.get('status') == 'completed':
                     pass
@@ -77,7 +63,7 @@ class VGM_Product(Document):
         images_dict = json.loads(json_string)
         base_url = frappe.utils.get_request_site_address()
         image_paths = [base_url + value for value in images_dict.values()]
-        collection_name = 'VGM_Audits_Product'
+        collection_name = self.category
         product_id = str(uuid.uuid4())
         image_ids = [str(uuid.uuid4())]
 
