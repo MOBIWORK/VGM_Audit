@@ -1,5 +1,5 @@
 API:
--Product: (add,edit) API FRAPPE
+-Product: (add,edit) API FRAPPE with image(json): ['/file/...']
 
     + delete Product  METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.deleteListByDoctype param:{'doctype': 'name_doctype', items : stringtify['1','2']}
     
