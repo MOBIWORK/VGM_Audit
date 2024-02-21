@@ -1,4 +1,5 @@
 import frappe
+import json
 import sys
 import os
 __dir__ = os.path.dirname(os.path.abspath(__file__))
@@ -53,7 +54,7 @@ def checkImageProductExist(*args,**kwargs):
         return {"status": "error"}
         # self.set('sum', self.sum)
 @frappe.whitelist(methods=["POST"],allow_guest=True)
-# param {items: arr,doctype: ''}
+# param {collection_name: ''}
 def deleteCategory(*args,**kwargs):
     RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
     deep_vision: DeepVision = DeepVision()
@@ -66,4 +67,37 @@ def deleteCategory(*args,**kwargs):
         return {"status": "success"}   
     else:
         return {"status": "error"}
+    
+@frappe.whitelist(allow_guest=True)
+def get_campaign_info(*args,**kwargs):
+    """
+    Trả về thông tin chiến dịch (campaign) dựa trên customer_code và e_name,
+    đồng thời kiểm tra xem cả customer_code và e_name có trong trường employees và retails không.
+
+    :param customer_code: Mã khách hàng.
+    :param e_name: Tên nhân viên.
+    :return: Danh sách các bản ghi chiến dịch (campaign).
+    """
+
+    # Lấy thông tin chiến dịch dựa trên điều kiện
+    campaign_records = frappe.get_all(
+        "VGM_Campaign",
+        fields=["*"]  # Thay thế field1, field2 bằng các trường bạn muốn lấy
+    )
+    # Lặp qua các bản ghi chiến dịch để kiểm tra customer_code và e_name
+    valid_campaigns = []
+    for campaign_record in campaign_records:
+        # Truy cập trường employees của mỗi chiến dịch
+        employees_json = frappe.db.get_value("VGM_Campaign", campaign_record.name, "employees")
+        employees_list = json.loads(employees_json) if employees_json else []
+
+        # Truy cập trường retails của mỗi chiến dịch
+        retails_json = frappe.db.get_value("VGM_Campaign", campaign_record.name, "retails")
+        retails_list = json.loads(retails_json) if retails_json else []
+        # Kiểm tra xem customer_code có trong danh sách nhân viên không
+        # và e_name có trong danh sách retails không
+        if kwargs.get('customer_code') in employees_list and kwargs.get('e_name') in retails_list:
+            valid_campaigns.append(campaign_record)
+
+    return valid_campaigns
         

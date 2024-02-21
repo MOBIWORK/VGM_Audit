@@ -7,5 +7,5 @@ API:
     "collection_name" : "5439ebcea2",
     "linkimages": "/files/ca_trung_400g.jpg"
 }
-
 - deleteCategory METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.deleteCategory param: {'collection_name' : "5439ebcea2"}
+- get_campaign_info METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.get_campaign_info param: {'customer_code' : "BH0123111122" , "e_name": "HR-EMP-00014"}
