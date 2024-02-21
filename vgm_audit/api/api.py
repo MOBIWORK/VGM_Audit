@@ -7,6 +7,7 @@ sys.path.append(__dir__)
 sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 from deepvision import DeepVision
 from deepvision.service import ProductCountService
+from datetime import datetime
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def deleteListByDoctype(*args,**kwargs): 
@@ -100,4 +101,3 @@ def get_campaign_info(*args,**kwargs):
             valid_campaigns.append(campaign_record)
 
     return valid_campaigns
-        
