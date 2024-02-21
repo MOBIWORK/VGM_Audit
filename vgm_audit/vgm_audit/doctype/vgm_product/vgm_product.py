@@ -42,7 +42,7 @@ class VGM_Product(Document):
                 json_string = self.images
                 images_dict = json.loads(json_string)
                 base_url = frappe.utils.get_request_site_address()
-                image_paths = [base_url + value for value in images_dict.values()]
+                image_paths = [base_url + value for value in images_dict]
                 # print(image_paths)
                 image_ids = [str(uuid.uuid4())]
                 response = products.add(collection_name, product_id_ai, self.product_name, image_ids, image_paths)
@@ -62,7 +62,7 @@ class VGM_Product(Document):
         json_string = self.images
         images_dict = json.loads(json_string)
         base_url = frappe.utils.get_request_site_address()
-        image_paths = [base_url + value for value in images_dict.values()]
+        image_paths = [base_url + value for value in images_dict]
         collection_name = self.category
         product_id = str(uuid.uuid4())
         image_ids = [str(uuid.uuid4())]
