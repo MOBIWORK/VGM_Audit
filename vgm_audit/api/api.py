@@ -52,3 +52,18 @@ def checkImageProductExist(*args,**kwargs):
     else:
         return {"status": "error"}
         # self.set('sum', self.sum)
+@frappe.whitelist(methods=["POST"],allow_guest=True)
+# param {items: arr,doctype: ''}
+def deleteCategory(*args,**kwargs):
+    RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
+    deep_vision: DeepVision = DeepVision()
+    product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(RECOGNITION_API_KEY)
+    products: Products = product_recognition.get_products()
+    collection_name = kwargs.get('collection_name')
+    products.delete_all(collection_name)
+
+    if response.get('status') == 'completed':
+        return {"status": "success"}   
+    else:
+        return {"status": "error"}
+        

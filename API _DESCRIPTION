@@ -1,0 +1,11 @@
+API:
+-Product: (add,edit) API FRAPPE
+
+    + delete Product  METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.deleteListByDoctype param:{'doctype': 'name_doctype', items : stringtify['1','2']}
+    
+- checkImageExist METHOD : POST  => url: {{domain}}/api/method/vgm_audit.api.api.checkImageProductExist param: {
+    "collection_name" : "5439ebcea2",
+    "linkimages": "/files/ca_trung_400g.jpg"
+}
+
+- deleteCategory METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.deleteCategory param: {'collection_name' : "5439ebcea2"}
