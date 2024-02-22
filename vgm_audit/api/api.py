@@ -98,7 +98,7 @@ def get_campaign_info(*args,**kwargs):
         retails_list = json.loads(retails_json) if retails_json else []
         # Kiểm tra xem customer_code có trong danh sách nhân viên không
         # và e_name có trong danh sách retails không
-        if kwargs.get('customer_code') in employees_list and kwargs.get('e_name') in retails_list:
+        if kwargs.get('customer_code') in retails_list and kwargs.get('e_name') in employees_list:
             valid_campaigns.append(campaign_record)
 
     return valid_campaigns
