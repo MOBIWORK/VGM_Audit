@@ -22,6 +22,7 @@ import {
   Typography,
   Upload,
   UploadProps,
+  Alert
 } from "antd";
 import { useState, useEffect } from "react";
 import Dragger from "antd/es/upload/Dragger";
@@ -29,6 +30,7 @@ import { useForm } from "antd/es/form/Form";
 import TextArea from "antd/es/input/TextArea";
 import { UploadFile } from "antd/lib";
 import  {AxiosService} from '../../services/server';
+import "./productsku.css";
 
 interface DataType {
   key: React.Key;
@@ -42,7 +44,8 @@ interface TypeCategory{
   name: string;
   category_name: string;
   category_description: string;
-  owner: string
+  owner: string;
+  hidden: boolean;
 }
 
 import type { GetProp } from "antd";
@@ -123,11 +126,22 @@ export default function Product_SKU() {
   const [searchCategory, setSearchCategory] = useState('');
 
   const [form] = useForm();
+  const [formEditCategory] = useForm();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpen1, setIsModalOpen1] = useState(false);
   const [isModalOpenAddCategory, setIsModalOpenAddCategory] = useState(false);
+  //item and isShowModel for delete category
+  const [deleteItemCategory, setDeleteItemCategory] = useState({});
+  const [isModelOpenDeleteCategory, setIsModelOpenDeleteCategory] = useState(false);
+  //item and isShowModel for edit category
+  const [editItemCategory, setEditItemCategory] = useState({});
+  const [isModelOpenEditCategory, setIsModelOpenEditCategory] = useState(false);
 
+  //biến cho sản phẩm theo danh mục
+  const [categorySelected, setCategorySelected] = useState({});
+
+  //Các hàm xử lý danh mục
   const fetchDataCategories = async () => {
     try {
       //setLoading(true);
@@ -144,7 +158,8 @@ export default function Product_SKU() {
         let dataCategories: TypeCategory[] = response.data.map((item: TypeCategory) => {
           return {
             ...item,
-            key: item.name
+            key: item.name,
+            hidden: true
           }
         })
         setCategories(dataCategories);
@@ -163,31 +178,88 @@ export default function Product_SKU() {
     fetchDataCategories();
   }
 
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
+  const handleMouseEnterCategory = (event, item) => {
+    setCategories(prevCategories => 
+      prevCategories.map(category => {
+        if (category.key === item.key) {
+          return { ...category, hidden: false };
+        }
+        return category;
+      })
+    );
+  }
 
-  const showModal1 = () => {
-    setIsModalOpen1(true);
-  };
+  const handleMouseLeaveCategory = (event, item) => {
+    setCategories(prevCategories => 
+      prevCategories.map(category => {
+        if (category.key === item.key) {
+          return { ...category, hidden: true };
+        }
+        return category;
+      })
+    );
+  }
+
+  const handleDeleteCategoryClick = (item) => {
+    let itemModel = {
+      'item': item,
+      'title': "Xóa " + item.category_name,
+      'contentConfirm': "Bạn có chắc muốn xóa " + item.category_name +" ra khỏi hệ thống không?", 
+      'contentRemind': "Khi thực hiện hành động này, sẽ không thể hoàn tác."
+    }
+    setDeleteItemCategory(itemModel);
+    setIsModelOpenDeleteCategory(true);
+  }
+
+  const handleDeleteOkCategory = async () => {
+    if(deleteItemCategory != null && deleteItemCategory.item != null){
+      let urlDelete = `/api/resource/VGM_Category/${deleteItemCategory.item.name}`;
+      let res = await AxiosService.delete(urlDelete);
+      if(res != null && res.message == "ok"){
+        fetchDataCategories();
+        handleDeleteCancelCategory();
+      }
+    }
+  }
+
+  const handleDeleteCancelCategory = () => {
+    setIsModelOpenDeleteCategory(false);
+    setDeleteItemCategory({});
+  }
+
+  const handleEditCategoryClick = (item) => {
+    formEditCategory.setFieldsValue({
+      name_item: item.category_name,
+      des: item.category_description,
+    });
+    setEditItemCategory(item);
+    setIsModelOpenEditCategory(true);
+  }
+
+  const handleOkEditCategory = async ()=> {
+    let objCategory = formEditCategory.getFieldsValue();
+    console.log(objCategory);
+    if(editItemCategory != null && editItemCategory.name != null){
+      let urlPutCategory = `/api/resource/VGM_Category/${editItemCategory.name}`;
+      let dataPut = {
+        'category_name': objCategory.name_item,
+        'category_description': objCategory.des
+      }
+      let res = await AxiosService.put(urlPutCategory, dataPut);
+      if(res != null && res.data != null){
+        fetchDataCategories();
+        handleCancelEditCategory();
+      }
+    }
+  }
+  
+  const handleCancelEditCategory = () => {
+    setEditItemCategory({});
+    setIsModelOpenEditCategory(false);
+  }
 
   const showModalCategory = () => {
     setIsModalOpenAddCategory(true);
-  };
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleOk1 = () => {
-    setIsModalOpen1(false);
-  };
-
-  const handleCancel1 = () => {
-    setIsModalOpen1(false);
   };
 
   const handleOkCategory = async () => {
@@ -214,6 +286,38 @@ export default function Product_SKU() {
   const handleCancelCategory = () => {
     setIsModalOpenAddCategory(false);
   };
+
+  //Các hàm xử lý danh sách sản phẩm
+  const handleSelectedCategory = (item) => {
+    setCategorySelected(item);
+  }
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const showModal1 = () => {
+    setIsModalOpen1(true);
+  };
+
+  
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleOk1 = () => {
+    setIsModalOpen1(false);
+  };
+
+  const handleCancel1 = () => {
+    setIsModalOpen1(false);
+  };
+
+  
 
   const [fileList, setFileList] = useState<UploadFile[]>([
     {
@@ -324,8 +428,20 @@ export default function Product_SKU() {
               bordered={false}
               dataSource={categories}
               renderItem={(item: any) => (
-                <List.Item>
-                  <Typography.Text></Typography.Text> {item.category_name}
+                <List.Item onMouseEnter={(event) => handleMouseEnterCategory(event, item)}
+                 onMouseLeave={(event) => handleMouseLeaveCategory(event, item)}
+                 onClick={() => handleSelectedCategory(item)}>
+                  <div className={"item_category"}>
+                    <span>
+                      <Typography.Text></Typography.Text> {item.category_name}
+                    </span>
+                    <span style={{display: item.hidden? 'none' : 'block'}}>
+                      <span style={{marginRight: "10px"}}>
+                        <EditOutlined key="edit" onClick={() => handleEditCategoryClick(item)}/>
+                      </span>
+                      <DeleteOutlined key="delete" onClick={() => handleDeleteCategoryClick(item)}/>
+                    </span>
+                  </div>
                 </List.Item>
               )}
             />
@@ -444,12 +560,58 @@ export default function Product_SKU() {
             >
               <Input />
             </FormItemCustom>
-            <FormItemCustom className="pt-3" label="Mô tả" name="des" required>
+            <FormItemCustom className="pt-3" label="Mô tả" name="des">
               <TextArea className="bg-[#F5F7FA]" autoSize={{ minRows: 3, maxRows: 5 }} />
             </FormItemCustom>
             
           </Form>
         </div>
+      </Modal>
+
+      <Modal
+        title={"Sửa danh mục"}
+        open={isModelOpenEditCategory}
+        onOk={handleOkEditCategory}
+        onCancel={handleCancelEditCategory}
+        width={600}
+        footer={[
+          <Button key="back" onClick={handleCancelEditCategory}>
+            Hủy
+          </Button>,
+          <Button key="submit" type="primary" onClick={handleOkEditCategory}>
+            Lưu
+          </Button>,
+        ]}
+      >
+        <div className="pt-4">
+          <Form layout="vertical" form={formEditCategory}>
+
+            <FormItemCustom
+              className="pt-3"
+              label="Tên danh mục"
+              name="name_item"
+              required
+            >
+              <Input value={editItemCategory.category_name}/>
+            </FormItemCustom>
+            <FormItemCustom className="pt-3" label="Mô tả" name="des">
+              <TextArea className="bg-[#F5F7FA]" autoSize={{ minRows: 3, maxRows: 5 }} value={editItemCategory.category_description}/>
+            </FormItemCustom>
+            
+          </Form>
+        </div>
+      </Modal>
+
+      <Modal
+        title={deleteItemCategory.title}
+        open={isModelOpenDeleteCategory}
+        onOk={handleDeleteOkCategory}
+        onCancel={handleDeleteCancelCategory}
+        okText="Xác nhận"
+        cancelText="Hủy"
+      >
+        <div>{deleteItemCategory.contentConfirm}</div>
+        <div>{deleteItemCategory.contentRemind}</div>
       </Modal>
     </>
   );

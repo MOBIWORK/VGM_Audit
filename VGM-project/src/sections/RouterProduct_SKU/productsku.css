@@ -5,3 +5,15 @@
   .custom-scroll .ant-table-scrollbar-thumb {
     width: 6px; /* Đặt chiều rộng cảm ứng thanh cuộn */
   }
+
+  .item_category{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .icon_hidden{
+    display: none;
+  }
+  .icon_show{
+    display: flex;
+  }
