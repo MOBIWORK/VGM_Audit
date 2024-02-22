@@ -23,11 +23,12 @@ import {
   Upload,
   UploadProps,
 } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Dragger from "antd/es/upload/Dragger";
 import { useForm } from "antd/es/form/Form";
 import TextArea from "antd/es/input/TextArea";
 import { UploadFile } from "antd/lib";
+import  {AxiosService} from '../../services/server';
 
 interface DataType {
   key: React.Key;
@@ -117,14 +118,41 @@ export default function Product_SKU() {
   const [selectionType, setSelectionType] = useState<"checkbox" | "radio">(
     "checkbox"
   );
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<any>([]);
+
   const [form] = useForm();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpen1, setIsModalOpen1] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        //setLoading(true);
+        const response = await AxiosService.get('/api/resource/VGM_Category?fields=["*"]');
+        // Kiểm tra xem kết quả từ API có chứa dữ liệu không
+        console.log(response);
+        if (response && response.data) {
+          // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
+          const dataWithKey: any[] = response.data.map((item: any) => {
+            return {
+              ...item,
+              key: item.name,
+            };
+          });
+          console.log(dataWithKey);
+          setCategories(dataWithKey);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        //setLoading(false);
+      }
+    };
   
+    fetchData();
+  }, []);
 
   const showModal = () => {
     setIsModalOpen(true);
