@@ -117,11 +117,15 @@ export default function Product_SKU() {
   const [selectionType, setSelectionType] = useState<"checkbox" | "radio">(
     "checkbox"
   );
+  const [categories, setCategories] = useState([]);
   const [form] = useForm();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpen1, setIsModalOpen1] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
+
+  
+
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -264,7 +268,7 @@ export default function Product_SKU() {
               header={false}
               footer={false}
               bordered={false}
-              dataSource={dataVG}
+              dataSource={categories}
               renderItem={(item: any) => (
                 <List.Item>
                   <Typography.Text></Typography.Text> {item}
