@@ -16,6 +16,7 @@ const RouterEmployee = lazy(()=> import('@/pages/RouterEmployee'))
 const SettingDMS = lazy(()=> import('@/pages/SettingDMS'))
 const Campaign = lazy(()=> import('@/pages/Campaign'))
 const CampaignCreate = lazy(()=> import('@/pages/CampaignCreate'))
+const ReportView = lazy(()=> import('@/pages/RouteReportView'))
 // Định nghĩa các route của dashboard
 export const dashboardRoutes = [
     {
@@ -57,6 +58,9 @@ export const dashboardRoutes = [
             },
             {
                 path: 'campaign-create', element: <CampaignCreate />
+            },
+            {
+                path: 'report-view', element: <ReportView />
             }
         ]
     },
