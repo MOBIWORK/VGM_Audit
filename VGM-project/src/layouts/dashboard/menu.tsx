@@ -1,4 +1,4 @@
-import { BarsOutlined, PieChartOutlined } from "@ant-design/icons";
+import { BarsOutlined, FileDoneOutlined, FileTextOutlined, PieChartOutlined } from "@ant-design/icons";
 import { Menu } from "antd";
 import { MenuProps } from "antd/lib";
 import { useState } from "react";
@@ -48,8 +48,21 @@ export default function MenuLeft() {
         Sản phẩm
       </NavLink>,
       "2",
-      <BarsOutlined />
+      <FileTextOutlined />
     ),
+    getItem(
+      <NavLink
+        className={({ isActive, isPending }) =>
+          isPending ? "pending" : isActive ? "active" : ""
+        }
+        to="/campaign"
+      >
+        Chiến dịch
+      </NavLink>,
+      "3",
+      <FileDoneOutlined />
+    ),
+    
   ];
   type MenuItem = Required<MenuProps>["items"][number];
   return (

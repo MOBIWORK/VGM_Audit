@@ -18,13 +18,15 @@ type button = {
 type Props = {
   title: string;
   buttons?: button[];
+  icon?: React.ReactNode
 };
 
-export function HeaderPage({ title, buttons }: Props) {
+export function HeaderPage({ title, buttons, icon }: Props) {
   return (
     <>
       <Row className="flex flex-wrap justify-between items-center px-0 py-5">
         <div className="flex justify-center items-center">
+          {icon}
           <span className="text-2xl font-semibold leading-[21px]">{title}</span>
         </div>
         <div className="flex mb-2">
