@@ -9,3 +9,16 @@ API:
 }
 - deleteCategory METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.deleteCategory param: {'collection_name' : "5439ebcea2"}
 - get_campaign_info METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.get_campaign_info param: {'customer_code' : "BH0123111122" , "e_name": "HR-EMP-00014"}
+- record_report_data METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.record_report_data param: {
+    "customer_code" : "5439ebcea2",
+    "e_name": "HR-EMP-00014",
+    "campaign_code": "12aed3e4ec",
+    "category" : "[\"5439ebcea2\",\"5439ebcea2\"]",
+    "date_check_in": "1708570011",
+    "date_check_out": "1708570011",
+    "latitude_check_in":"",
+    "latitude_check_out":"",
+    "longitude_check_in":"",
+    "longitude_check_out":"",
+    "report_sku": "[{\"category\": \"5439ebcea2\",\"images\": [\"/files/ca_trung_gianhang.jpg\"],\"product\": \"5f45a9ea51\"}]"
+}

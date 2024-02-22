@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 import json
 import sys
 import os
@@ -76,7 +77,7 @@ def get_campaign_info(*args,**kwargs):
     đồng thời kiểm tra xem cả customer_code và e_name có trong trường employees và retails không.
 
     :param customer_code: Mã khách hàng.
-    :param e_name: Tên nhân viên.
+    :param e_name: Mã nhân viên.
     :return: Danh sách các bản ghi chiến dịch (campaign).
     """
 
@@ -101,3 +102,69 @@ def get_campaign_info(*args,**kwargs):
             valid_campaigns.append(campaign_record)
 
     return valid_campaigns
+@frappe.whitelist(allow_guest=True)
+def record_report_data(*args, **kwargs):
+    date_format_with_time = '%Y/%m/%d %H:%M:%S'
+    date_check_in = int(kwargs.get('date_check_in'))
+    date_check_out = int(kwargs.get('date_check_out'))
+    
+    date_check_in = datetime.fromtimestamp(date_check_in).strftime(date_format_with_time)
+    date_check_out = datetime.fromtimestamp(date_check_out).strftime(date_format_with_time)
+    category = json.loads(kwargs.get('category'))
+    categories_str = json.dumps(category)  # Chuyển đổi danh sách thành chuỗi JSON
+    try:
+        data = {
+            'doctype': 'VGM_Report',
+            'retail_code': kwargs.get('customer_code'),
+            'employee_code': kwargs.get('e_name'),
+            'campaign_code': kwargs.get('campaign_code'),
+            'categories': categories_str,
+            'date_check_in' : date_check_in,
+            'date_check_out' : date_check_out,
+            'latitude_check_in': '',
+            'latitude_check_out': '',
+            'longitude_check_in': '',
+            'longitude_check_out': ''
+        }
+        doc = frappe.get_doc(data)
+        doc.insert()
+
+        report_sku_json = kwargs.get('report_sku')
+         #Thêm các trường vào doctype con VGM_ReportDetailSKU
+        if report_sku_json:
+            try:
+                report_sku_data = json.loads(report_sku_json)
+                for item in report_sku_data:
+                    child_doc = frappe.new_doc('VGM_ReportDetailSKU')
+                    # AI đếm số lượng sản phẩm trong ảnh
+                    RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
+                    deep_vision: DeepVision = DeepVision()
+                    recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
+                    base_url = frappe.utils.get_request_site_address()
+                    collection_name = item.get('category')
+                    image_ai = item.get('images')
+                    image_path = base_url + image_ai[0]
+                    product_id = item.get('product')
+                    get_product_name =  frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
+                    response = recognition.count(collection_name, image_path)
+                    if response.get('status') == 'completed':
+                        count_value = response.get('result', {}).get('count', {}).get(get_product_name)
+                    else:
+                        count_value = 0
+                    child_doc.update({
+                       'parent': doc.name, 
+                       'parentfield': 'report_sku',
+                       'parenttype': doc.doctype,
+                       'category': item.get('category'),
+                       'sum_product': count_value,
+                       'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
+                       'product': product_id
+                    })
+                    child_doc.insert()
+            except Exception as e:
+                return {'status': 'fail','message': _("Failed to process doctype VGM_ReportDetailSKU: {0}").format(str(e))}
+        else:
+            return {'status': 'fail', 'message': _("No data provided for report_sku")}
+        return {'status': 'success', "result" : doc.name}
+    except Exception as e:
+        return {'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))}
