@@ -36,6 +36,15 @@ interface DataType {
   age: number;
   address: string;
 }
+
+interface TypeCategory{
+  key: React.Key;
+  name: string;
+  category_name: string;
+  category_description: string;
+  owner: string
+}
+
 import type { GetProp } from "antd";
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
@@ -106,53 +115,53 @@ const rowSelection = {
   },
 };
 
-const dataVG = [
-  "Danh mục sản phẩm A",
-  "Danh mục 2",
-  "Danh mục sản phẩm A",
-  "Man charged over missing wedding girl.",
-  "Los Angeles battles huge wildfires.",
-];
-
 export default function Product_SKU() {
   const [selectionType, setSelectionType] = useState<"checkbox" | "radio">(
     "checkbox"
   );
-  const [categories, setCategories] = useState<any>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [searchCategory, setSearchCategory] = useState('');
 
   const [form] = useForm();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpen1, setIsModalOpen1] = useState(false);
-  const [isModalOpen2, setIsModalOpen2] = useState(false);
+  const [isModalOpenAddCategory, setIsModalOpenAddCategory] = useState(false);
+
+  const fetchDataCategories = async () => {
+    try {
+      //setLoading(true);
+      let urlCategory = '/api/resource/VGM_Category?fields=["*"]';
+      console.log(searchCategory);
+      if(searchCategory != null && searchCategory != ""){
+        let filterComand = `[["category_name", "like", "${searchCategory}"]]`;
+        urlCategory += `&${filterComand}`;
+      }
+      const response = await AxiosService.get(urlCategory);
+      // Kiểm tra xem kết quả từ API có chứa dữ liệu không
+      if (response && response.data) {
+        // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
+        let dataCategories: TypeCategory[] = response.data.map((item: TypeCategory) => {
+          return {
+            ...item,
+            key: item.name
+          }
+        })
+        setCategories(dataCategories);
+      }
+    } catch (error) {
+    } finally {
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        //setLoading(true);
-        const response = await AxiosService.get('/api/resource/VGM_Category?fields=["*"]');
-        // Kiểm tra xem kết quả từ API có chứa dữ liệu không
-        console.log(response);
-        if (response && response.data) {
-          // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
-          const dataWithKey: any[] = response.data.map((item: any) => {
-            return {
-              ...item,
-              key: item.name,
-            };
-          });
-          console.log(dataWithKey);
-          setCategories(dataWithKey);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        //setLoading(false);
-      }
-    };
-  
-    fetchData();
+    fetchDataCategories();
   }, []);
+
+  const onChangeFilterCategory = (event) => {
+    setSearchCategory(event.target.value);
+    fetchDataCategories();
+  }
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -162,8 +171,8 @@ export default function Product_SKU() {
     setIsModalOpen1(true);
   };
 
-  const showModal2 = () => {
-    setIsModalOpen2(true);
+  const showModalCategory = () => {
+    setIsModalOpenAddCategory(true);
   };
   const handleOk = () => {
     setIsModalOpen(false);
@@ -181,12 +190,29 @@ export default function Product_SKU() {
     setIsModalOpen1(false);
   };
 
-  const handleOk2 = () => {
-    setIsModalOpen2(false);
+  const handleOkCategory = async () => {
+    let valField = form.getFieldsValue();
+    let dataPost = {
+      'doc': JSON.stringify({
+        'doctype': "VGM_Category",
+        'category_name': valField.name_item,
+        'category_description': valField.des
+      }),
+      'action': "Save"
+    }
+    let resCreateCategory = await AxiosService.post('/api/method/frappe.desk.form.save.savedocs', dataPost);
+    if(resCreateCategory != null && resCreateCategory.docs != null && resCreateCategory.docs.length > 0){
+      form.resetFields();
+      //Hiển thị thông báo thêm mới thành công
+      fetchDataCategories();
+      setIsModalOpenAddCategory(false);
+    }else{
+      //Hiển thị thông báo thêm mới thất bại
+    }
   };
 
-  const handleCancel2 = () => {
-    setIsModalOpen2(false);
+  const handleCancelCategory = () => {
+    setIsModalOpenAddCategory(false);
   };
 
   const [fileList, setFileList] = useState<UploadFile[]>([
@@ -280,13 +306,13 @@ export default function Product_SKU() {
           <div className="bg-white rounded-xl p-4">
             <div className="flex justify-between items-center">
               <div><p className="text-base leading-5 font-medium text-[#212B36]">Danh mục</p></div>
-              <div className="cursor-pointer" onClick={showModal2}>
+              <div className="cursor-pointer" onClick={showModalCategory}>
                 <PlusOutlined />
               </div>
             </div>
             <div className="py-3">
-              <FormItemCustom className="w-full border-none">
-                <Input
+              <FormItemCustom className="w-full border-none" name="filter_category">
+                <Input onChange={onChangeFilterCategory} value={searchCategory}
                   placeholder="Tìm kiếm mục danh"
                   prefix={<SearchOutlined />}
                 />
@@ -299,7 +325,7 @@ export default function Product_SKU() {
               dataSource={categories}
               renderItem={(item: any) => (
                 <List.Item>
-                  <Typography.Text></Typography.Text> {item}
+                  <Typography.Text></Typography.Text> {item.category_name}
                 </List.Item>
               )}
             />
@@ -394,15 +420,15 @@ export default function Product_SKU() {
 
       <Modal
         title={"Thêm mới danh mục"}
-        open={isModalOpen2}
-        onOk={handleOk2}
-        onCancel={handleCancel2}
+        open={isModalOpenAddCategory}
+        onOk={handleOkCategory}
+        onCancel={handleCancelCategory}
         width={600}
         footer={[
-          <Button key="back" onClick={handleCancel2}>
+          <Button key="back" onClick={handleCancelCategory}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOk1}>
+          <Button key="submit" type="primary" onClick={handleOkCategory}>
             Lưu
           </Button>,
         ]}
