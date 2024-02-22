@@ -168,3 +168,37 @@ def record_report_data(*args, **kwargs):
         return {'status': 'success', "result" : doc.name}
     except Exception as e:
         return {'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))}
+    
+@frappe.whitelist(allow_guest=True)
+def search_vgm_reports(*args,**kwargs):
+    date_format_with_time = '%Y/%m/%d %H:%M:%S'
+    campaign_code = kwargs.get('campaign_code')
+    date_check_in = kwargs.get('date_check_in')
+    date_check_out = kwargs.get('date_check_out')
+    e_name = kwargs.get('e_name')
+    try:
+        # Xây dựng các điều kiện cho câu truy vấn
+        filters = {}
+        if campaign_code:
+            filters["campaign_code"] = ["like", "%{}%".format(campaign_code)]
+        if date_check_in:
+            date_check_in = int(kwargs.get('date_check_in'))
+            date_check_in = datetime.fromtimestamp(date_check_in).strftime(date_format_with_time)
+            filters["date_check_in"] = [">=", date_check_in]
+        if date_check_out:
+            date_check_out = int(kwargs.get('date_check_out'))
+            date_check_out = datetime.fromtimestamp(date_check_out).strftime(date_format_with_time)
+            filters["date_check_out"] = ["<=", date_check_out]
+        if e_name:
+            filters["employee_code"] = e_name
+
+        # Tìm kiếm các bản ghi VGM_Report thỏa mãn các điều kiện
+        
+        reports = frappe.get_all("VGM_Report",
+            filters=filters,
+            fields=["name", "retail_code", "employee_code", "date_check_in", "date_check_out"]
+        )
+
+        return {"status": "success", "reports": reports}
+    except Exception as e:
+        return {"status": "fail", "message": _("Failed to retrieve VGM Reports: {0}").format(str(e))}

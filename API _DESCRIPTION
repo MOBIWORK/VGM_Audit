@@ -22,3 +22,9 @@ API:
     "longitude_check_out":"",
     "report_sku": "[{\"category\": \"5439ebcea2\",\"images\": [\"/files/ca_trung_gianhang.jpg\"],\"product\": \"5f45a9ea51\"}]"
 }
+- search_vgm_reports METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.search_vgm_reports param: {
+    "campaign_code" : "12aed3e4",
+    "date_check_in" : "1708565008",
+    "date_check_out" : "1708824208",
+    "e_name" : "
+}
