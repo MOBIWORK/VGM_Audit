@@ -68,6 +68,11 @@ export default function ReportDetail() {
   const [selectionType, setSelectionType] = useState<"checkbox" | "radio">(
     "checkbox"
   );
+  const handleRowClick = (record) => {
+    // Lưu record vào local storage
+    localStorage.setItem('recordData', JSON.stringify(record));
+    navigate(`/report-view`);
+  };
   //Các hàm xử lý danh mục
   const fetchDataReport= async () => {
     try {

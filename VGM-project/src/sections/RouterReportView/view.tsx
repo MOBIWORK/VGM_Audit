@@ -1,4 +1,5 @@
 import { VscAdd } from "react-icons/vsc";
+import { useState,useEffect } from "react";
 import { HeaderPage } from "../../components";
 import { LeftOutlined,CaretRightOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -10,26 +11,22 @@ import Customer from "./customer-list";
 import EmployeeSell from "./employee-sale";
 import './view.css'; 
 export default function  ReportView() {
+  const [recordData, setRecordData] = useState(null);
   const navigate = useNavigate();
   const onChange = (key: string | string[]) => {
     console.log(key);
   };
-  const text = `
-  A dog is a type of domesticated animal.
-  Known for its loyalty and faithfulness,
-  it can be found as a welcome guest in many households across the world.
-`;
   const [form] = Form.useForm();
   const items: CollapseProps['items'] = [
     {
       key: '1',
       label: <span style={{ fontWeight: 700 }}>Thông tin chung</span>,
-      children: <GeneralInformation form={form} />,
+      children: <GeneralInformation form={form} recordData={recordData} />,
     },
     {
       key: '2',
       label: <span style={{ fontWeight: 700 }}>Sản phẩm</span>,
-      children: <Product
+      children: <Product recordData={recordData}
       // handleCustomer={setCustomerRouter}
       // listCustomer={customerRouter}
     />,
@@ -37,11 +34,28 @@ export default function  ReportView() {
     
   ];
   
- 
+  useEffect(() => {
+    // Lấy record từ local storage khi component được mount
+    const storedRecordData = localStorage.getItem('recordData');
+    if (storedRecordData) {
+      setRecordData(JSON.parse(storedRecordData));
+    }
+
+    // Xóa record khỏi local storage sau khi đã sử dụng
+    localStorage.removeItem('recordData');
+  }, []);
+  const renderTitle = () => {
+    if (recordData) {
+      // Tiêu đề bao gồm tên cửa hàng và chiến dịch từ storedRecordData
+      return `${recordData.retail_code} - ${recordData.campaign_name}`;
+    }
+    // Nếu không có dữ liệu, hiển thị một tiêu đề mặc định
+    return 'Tiêu đề';
+  };
   return (
     <>
       <HeaderPage
-        title="[Tên cửa hàng ] - [chiến dịch]"
+        title={renderTitle()}
         icon={
           <p
             onClick={() => navigate("/")}
@@ -61,44 +75,8 @@ export default function  ReportView() {
       />
       <div className="bg-white  rounded-xl">
         <Form layout="vertical" form={form}>
-        <Collapse items={items} defaultActiveKey={['1']} onChange={onChange} className="custom-collapse"/>
-          {/* <Tabs
-            defaultActiveKey="1"
-            items={[
-              {
-                label: <p className="px-4 mb-0"> Thông tin chung</p>,
-                key: "1",
-                children: <GeneralInformation form={form} />,
-              },
-              {
-                label: <p className="px-4 mb-0">Sản phẩm</p>,
-                key: "2",
-                children: (
-                  <Product
-                    // handleCustomer={setCustomerRouter}
-                    // listCustomer={customerRouter}
-                  />
-                ),
-              },
-              {
-                label: <p className="px-4 mb-0">Nhân viên bán hàng</p>,
-                key: "3",
-                children: (
-                  <EmployeeSell
-                  />
-                ),
-              },
-              {
-                label: <p className="px-4 mb-0">Khách hàng</p>,
-                key: "4",
-                children: (
-                  <Customer
-                  />
-                ),
-              },
-            ]}
-            indicatorSize={(origin) => origin - 18}
-          /> */}
+        <Collapse items={items} defaultActiveKey={['1','2']} onChange={onChange} className="custom-collapse"/>
+          {}
         </Form>
       </div>
     </>

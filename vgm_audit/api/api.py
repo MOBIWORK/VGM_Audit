@@ -1,4 +1,5 @@
 import frappe
+import requests
 from frappe import _
 import json
 import sys
@@ -211,9 +212,26 @@ def get_list_reports():
       
         # Kết hợp thông tin mã chiến dịch với tên mã chiến dịch
         for report in reports:
+            category_names = []
+            categories = report.get("categories")
+            
+            if categories is not None:
+                categories_code = json.loads(categories)
+                for code in categories_code:
+                    # Lấy tên tương ứng của mã từ doctype VGM_Category
+                    name = frappe.get_value("VGM_Category", {"name": code}, "category_name")
+                    category_names.append({code: name})
+                    
+            report["category_names"] = category_names 
+            
             campaign_code = report.get("campaign_code")
             campaign_name = frappe.get_value("VGM_Campaign", filters={"name": campaign_code}, fieldname="campaign_name")
             report["campaign_name"] = campaign_name
+            
+            # Lấy dữ liệu từ child table
+            children_data = frappe.get_all("VGM_ReportDetailSKU", filters={"parent": report.name}, fields=["*"])
+            # Thêm dữ liệu từ child table vào bản ghi
+            report["detail"] = children_data
 
         # Trả về kết quả thành công cùng với danh sách bản ghi và tên mã chiến dịch
         return {"status": "success", "data": reports}

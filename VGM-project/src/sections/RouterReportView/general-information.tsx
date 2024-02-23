@@ -1,4 +1,5 @@
 import { Col, Input, Select } from "antd";
+import { useState,useEffect } from "react";
 import RowCustom from "../RouterCreate/styled";
 import { FormItemCustom } from "../../components";
 import TextArea from "antd/es/input/TextArea";
@@ -17,39 +18,57 @@ export const statusOption: Options[] = [
     value: "Lock",
   },
 ];
-export default function GeneralInformation({ form }) {
+export default function GeneralInformation({ form,recordData }) {
+  const { getFieldDecorator } = form;
+  useEffect(() => {
+    if (recordData) {
+      form.setFieldsValue({
+        store: recordData.campaign_code,
+        campaign_name: recordData.campaign_name,
+        date_check_in: recordData.date_check_in,
+        date_check_out: recordData.date_check_out,
+        employee_code: recordData.employee_code,
+        quatity: "3",
+        // Gán giá trị cho các trường khác nếu cần
+      });
+    }
+  }, [recordData]);
   return (
     <>
       <div className="p-4 pt-6 pb-[58px]">
         <RowCustom>
-          <Col span={8}>
-            <FormItemCustom label="Tên chiến dịch" required>
+          <Col span={12}>
+            <FormItemCustom label="Cửa hàng" name="store" required>
               <Input />
             </FormItemCustom>
           </Col>
-          <Col span={8}>
-            <FormItemCustom label="Thời gian bắt đầu" required>
-              <Input />
-            </FormItemCustom>
-          </Col>
-          <Col span={8}>
-            <FormItemCustom label="Thời gian kết thúc" required>
+          <Col span={12}>
+            <FormItemCustom label="Chiến dịch" name="campaign_name" required>
               <Input />
             </FormItemCustom>
           </Col>
         </RowCustom>
         <RowCustom className="pt-2">
-          <Col span={8}>
-            <FormItemCustom label="Trạng thái" name="status">
-              <Select options={statusOption} defaultValue={"Active"} />
+        <Col span={12}>
+            <FormItemCustom label="Thời gian vào" name="date_check_in" required>
+              <Input />
             </FormItemCustom>
           </Col>
-          <Col span={8}>
-            <FormItemCustom label="Mô tả" required>
-              <TextArea
-                className="bg-[#F5F7FA]"
-                autoSize={{ minRows: 3, maxRows: 5 }}
-              />
+          <Col span={12}>
+            <FormItemCustom label="Thời gian ra" name="date_check_out" required>
+              <Input />
+            </FormItemCustom>
+          </Col>
+        </RowCustom>
+        <RowCustom className="pt-2">
+        <Col span={12}>
+            <FormItemCustom label="Nhân viên thực hiện"  name="employee_code" required>
+              <Input />
+            </FormItemCustom>
+          </Col>
+          <Col span={12}>
+            <FormItemCustom label="Số lượng danh mục sản phẩm" name="quatity" required>
+              <Input />
             </FormItemCustom>
           </Col>
         </RowCustom>
