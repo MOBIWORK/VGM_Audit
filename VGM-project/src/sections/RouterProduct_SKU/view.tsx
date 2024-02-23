@@ -88,6 +88,7 @@ export default function Product_SKU() {
   //biến cho sản phẩm theo danh mục
   const [categorySelected, setCategorySelected] = useState({});
   const [products, setProducts] = useState<any[]>([]);
+  const [searchProduct, setSearchProduct] = useState("");
   const [fileUploadAddProduct, setFileUploadAddProduct] = useState([]);
   const [deleteItemProduct, setDeleteItemProduct] = useState({});
   const [isModelOpenDeleteProduct, setIsModelOpenDeleteProduct] = useState(false);
@@ -231,8 +232,8 @@ export default function Product_SKU() {
       let urlCategory = '/api/resource/VGM_Category?fields=["*"]';
       console.log(searchCategory);
       if(searchCategory != null && searchCategory != ""){
-        let filterComand = `[["category_name", "like", "${searchCategory}"]]`;
-        urlCategory += `&${filterComand}`;
+        let filterComand = `[["category_name", "like", "%${searchCategory}%"]]`;
+        urlCategory += `&filters=${filterComand}`;
       }
       const response = await AxiosService.get(urlCategory);
       // Kiểm tra xem kết quả từ API có chứa dữ liệu không
@@ -256,9 +257,12 @@ export default function Product_SKU() {
     fetchDataCategories();
   }, []);
 
+  useEffect(() => {
+    fetchDataCategories();
+  }, [searchCategory]);
+
   const onChangeFilterCategory = (event) => {
     setSearchCategory(event.target.value);
-    fetchDataCategories();
   }
 
   const handleMouseEnterCategory = (event, item) => {
@@ -386,10 +390,19 @@ export default function Product_SKU() {
 
   useEffect(() => {
     if(barcodeEditProduct != null && barcodeEditProduct != "") renderBarcodeByValue(barcodeEditProduct);
-  }, [barcodeEditProduct])
+  }, [barcodeEditProduct]);
+
+  useEffect(() => {
+    initDataProductByCategory();
+  }, [searchProduct])
 
   const initDataProductByCategory = async () => {
-    let urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"]]`;
+    let urlProducts = "";
+    if(searchProduct != null && searchProduct != ""){
+      urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"],["product_name","like","%${searchProduct}%"]]`;
+    }else{
+      urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"]]`;
+    }
     let res = await AxiosService.get(urlProducts);
     if (res && res.data) {
       // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
@@ -403,6 +416,10 @@ export default function Product_SKU() {
       setProducts(dataProducts);
     }
   }
+
+  const onChangeFilterProduct = (event) => {
+    setSearchProduct(event.target.value);
+  };
 
   const showModalAddProduct = () => {
     if(categorySelected != null && categorySelected.name != null){
@@ -602,14 +619,19 @@ export default function Product_SKU() {
         if(res.message[item.product_name] != null) item.product_count = res.message[item.product_name];
       })
     }
-    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? fileUploadCheckProduct[0].file_url : "");
+    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? import.meta.env.VITE_BASE_URL+fileUploadCheckProduct[0].file_url : "");
     setResultProductCheck(arrProductDetect);
     setIsModelResultProduct(true);
+    handleCancelCheckProduct();
   };
 
   const handleCancelCheckProduct = () => {
     setIsModalOpenCheckProduct(false);
   };
+
+  const handleCancelResultCheckProduct = () => {
+    setIsModelResultProduct(false);
+  }
   
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [fileListEdit, setFileListEdit] = useState<UploadFile[]>([]);
@@ -678,7 +700,7 @@ export default function Product_SKU() {
         <Col span={18} push={6}>
           <div className="bg-white rounded-xl">
             <FormItemCustom className="w-[320px] border-none p-4">
-              <Input
+              <Input value={searchProduct} onChange={onChangeFilterProduct}
                 placeholder="Tìm kiếm sản phẩm"
                 prefix={<SearchOutlined />}
               />
@@ -740,7 +762,7 @@ export default function Product_SKU() {
       </Row>
 
       <Modal
-        title="Kiểm tra sản phẩm"
+        title="Kiểm tra ảnh sản phẩm"
         open={isModalOpenCheckProduct}
         width={777}
         onOk={handleOkCheckProduct}
@@ -763,6 +785,26 @@ export default function Product_SKU() {
           </p>
           <p className="ant-upload-text">Kéo, thả hoặc chọn ảnh để tải lên</p>
         </Dragger>
+      </Modal>
+
+      <Modal
+        title="Kiểm tra ảnh sản phẩm"
+        open={isModelResultProduct}
+        width={777}
+        onCancel={handleCancelResultCheckProduct}
+        footer={null}
+      >
+        <div style={{marginBottom: "20px"}}>
+          <img src={urlImageCheckProductResult} style={{ maxWidth: '100%', height: 'auto' }} />
+        </div>
+        <div>
+          <div>Kết quả kiểm tra hình ảnh:</div>
+          <Table dataSource={resultProductCheck} columns={[
+                  { title: 'Mã sản phẩm', dataIndex: 'product_code', key: 'product_code' },
+                  { title: 'Tên sản phẩm', dataIndex: 'product_name', key: 'product_name' },
+                  { title: 'Số lượng', dataIndex: 'product_count', key: 'product_count' },
+                ]} pagination={false} />
+        </div>
       </Modal>
 
       <Modal

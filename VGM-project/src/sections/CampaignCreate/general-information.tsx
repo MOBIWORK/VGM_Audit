@@ -1,4 +1,4 @@
-import { Col, Input, Select } from "antd";
+import { Col, Input, Select, DatePicker } from "antd";
 import RowCustom from "../RouterCreate/styled";
 import { FormItemCustom } from "../../components";
 import TextArea from "antd/es/input/TextArea";
@@ -10,26 +10,34 @@ type Options = {
 export const statusOption: Options[] = [
   {
     label: "Hoạt động",
-    value: "Active",
+    value: "Open",
   },
   {
-    label: "Khóa",
-    value: "Lock",
+    label: "Đóng",
+    value: "Close",
   },
 ];
 export default function GeneralInformation({ form }) {
+
+  const onChangeDateStart = (value, dateString) => {
+    console.log(value, dateString)
+  }
+  const onOkDateStart = (value) => {
+    console.log(value);
+  }
+
   return (
     <>
       <div className="p-4 pt-6 pb-[58px]">
         <RowCustom>
           <Col span={8}>
-            <FormItemCustom label="Tên chiến dịch" required>
+            <FormItemCustom label="Tên chiến dịch" name="campaign_name" required>
               <Input />
             </FormItemCustom>
           </Col>
           <Col span={8}>
-            <FormItemCustom label="Thời gian bắt đầu" required>
-              <Input />
+            <FormItemCustom label="Thời gian bắt đầu" >
+            <DatePicker showTime onChange={onChangeDateStart} onOk={onOkDateStart} />
             </FormItemCustom>
           </Col>
           <Col span={8}>

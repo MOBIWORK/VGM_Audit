@@ -11,6 +11,11 @@ import EmployeeSell from "./employee-sale";
 export default function  CampaignCreate() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+
+  const handleAddCampaign = async () => {
+    console.log(form.getFieldsValue());
+  }
+
   return (
     <>
       <HeaderPage
@@ -29,6 +34,7 @@ export default function  CampaignCreate() {
             type: "primary",
             size: "20px",
             className: "flex items-center",
+            action: handleAddCampaign
           },
         ]}
       />
