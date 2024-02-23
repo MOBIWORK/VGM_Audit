@@ -1,6 +1,7 @@
 
 import { LuUploadCloud } from "react-icons/lu";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
+import  {AxiosService} from '../../services/server';
 import { VscAdd } from "react-icons/vsc";
 import {
   DeleteOutlined,
@@ -8,7 +9,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { Input, Space, Table, TableColumnsType,DatePicker,Select } from "antd";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 interface DataType {
   key: React.Key;
@@ -27,66 +28,27 @@ const columns: TableColumnsType<DataType> = [
   },
   {
     title: "Cửa hàng",
-    dataIndex: "name",
+    dataIndex: "retail_code",
   },
   {
     title: "Tên chiến dịch",
-    dataIndex: "name",
+    dataIndex: "campaign_name",
   },
   {
     title: "Nhân viên thực hiện",
-    dataIndex: "name",
+    dataIndex: "employee_code",
   },
   {
     title: "Thời gian vào",
-    dataIndex: "start",
+    dataIndex: "date_check_in",
   },
   {
     title: "Thời gian ra",
-    dataIndex: "end",
+    dataIndex: "date_check_out",
   },
   {
     title: "Số lượng",
-    dataIndex: "sum",
-  },
-];
-
-const data: DataType[] = [
-  {
-    key: "1",
-    stt: "1",
-    name: "John Brown",
-    status: "Hoạt động",
-    start: "dd/mm/yy",
-    end: "dd/mm/yy",
-    sum : "2"
-  },
-  {
-    key: "2",
-    stt: "2",
-    name: "Jim Green",
-    status: "Hoạt động",
-    start: "dd/mm/yy",
-    end: "dd/mm/yy",
-    sum : "1"
-  },
-  {
-    key: "3",
-    stt: "3",
-    name: "Joe Black",
-    status: "Hoạt động",
-    start: "dd/mm/yy",
-    end: "dd/mm/yy",
-    sum : "2"
-  },
-  {
-    key: "4",
-    stt: "4",
-    name: "Disabled User",
-    status: "Hoạt động",
-    start: "dd/mm/yy",
-    end: "dd/mm/yy",
-    sum : "2"
+    dataIndex: "quantity_cate",
   },
 ];
 // rowSelection object indicates the need for row selection
@@ -102,9 +64,37 @@ const rowSelection = {
 
 export default function ReportDetail() {
   const navigate = useNavigate();
+  const [dataReport, setDataReport] = useState<any[]>([]);
   const [selectionType, setSelectionType] = useState<"checkbox" | "radio">(
     "checkbox"
   );
+  //Các hàm xử lý danh mục
+  const fetchDataReport= async () => {
+    try {
+      //setLoading(true);
+      let urlReport = '/api/method/vgm_audit.api.api.get_list_reports';
+      const response = await AxiosService.get(urlReport);
+      // Kiểm tra xem kết quả từ API có chứa dữ liệu không
+      if (response && response.message.data) {
+        //Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
+        let dataReport: DataType[] = response.message.data.map((item: DataType,index: number) => {
+          return {
+            ...item,
+            key: item.name,
+            stt: index+1
+          }
+        })
+        setDataReport(dataReport);
+      }
+    } catch (error) {
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    fetchDataReport();
+  }, []);
+
   return (
     <>
       <HeaderPage
@@ -158,7 +148,7 @@ export default function ReportDetail() {
         <div className="p-4">
           <TableCustom
             columns={columns}
-            dataSource={data}
+            dataSource={dataReport}
             onRow={(record, rowIndex) => {
               return {
                 onClick: () => handleRowClick(record), // Gọi hàm xử lý khi click vào dòng

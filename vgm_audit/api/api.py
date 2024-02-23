@@ -70,7 +70,7 @@ def deleteCategory(*args,**kwargs):
     else:
         return {"status": "error"}
     
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(methods=["POST"],allow_guest=True)
 def get_campaign_info(*args,**kwargs):
     """
     Trả về thông tin chiến dịch (campaign) dựa trên customer_code và e_name,
@@ -102,7 +102,7 @@ def get_campaign_info(*args,**kwargs):
             valid_campaigns.append(campaign_record)
 
     return valid_campaigns
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(methods=["POST"],allow_guest=True)
 def record_report_data(*args, **kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'
     date_check_in = int(kwargs.get('date_check_in'))
@@ -169,7 +169,7 @@ def record_report_data(*args, **kwargs):
     except Exception as e:
         return {'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))}
     
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(methods=["POST"],allow_guest=True)
 def search_vgm_reports(*args,**kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'
     campaign_code = kwargs.get('campaign_code')
@@ -202,3 +202,21 @@ def search_vgm_reports(*args,**kwargs):
         return {"status": "success", "reports": reports}
     except Exception as e:
         return {"status": "fail", "message": _("Failed to retrieve VGM Reports: {0}").format(str(e))}
+    
+@frappe.whitelist(methods=["GET"], allow_guest=True)
+def get_list_reports():
+    try:
+        # Lấy danh sách các bản ghi VGM_Report
+        reports = frappe.get_all("VGM_Report", fields=["*"])
+      
+        # Kết hợp thông tin mã chiến dịch với tên mã chiến dịch
+        for report in reports:
+            campaign_code = report.get("campaign_code")
+            campaign_name = frappe.get_value("VGM_Campaign", filters={"name": campaign_code}, fieldname="campaign_name")
+            report["campaign_name"] = campaign_name
+
+        # Trả về kết quả thành công cùng với danh sách bản ghi và tên mã chiến dịch
+        return {"status": "success", "data": reports}
+    except Exception as e:
+        # Trả về thông báo lỗi nếu có lỗi xảy ra
+        return {"status": "fail", "message": _("Failed to retrieve VGM Reports with campaign names: {0}").format(str(e))}
