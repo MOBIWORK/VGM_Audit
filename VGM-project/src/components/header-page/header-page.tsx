@@ -1,9 +1,5 @@
 import { Button, Row } from "antd";
 import React from "react";
-import { IoIosMenu } from "react-icons/io";
-import { LiaDownloadSolid } from "react-icons/lia";
-import { LuUploadCloud } from "react-icons/lu";
-import { VscAdd } from "react-icons/vsc";
 
 type button = {
   label: string;
@@ -30,19 +26,23 @@ export function HeaderPage({ title, buttons, icon }: Props) {
           <span className="text-2xl font-semibold leading-[21px]">{title}</span>
         </div>
         <div className="flex mb-2">
+        
           {buttons &&
-            buttons.map(({className,size,icon,action,type,label,...rest}:button) => (
-              <Button
-                className={className}
-                size={size || "middle"}
-                icon={icon}
-                onClick={action}
-                type={type}
-                 {...rest}
-              >
-                {label}
-              </Button>
-            ))}
+            buttons.filter(button => button).map(({className,size,icon,action,type,label,...rest}:button) => {
+              
+              return (
+                <Button
+                  className={className}
+                  size={size || "middle"}
+                  icon={icon}
+                  onClick={action}
+                  type={type}
+                   {...rest}
+                >
+                  {label}
+                </Button>
+              )
+            })}
         </div>
       </Row>
     </>
