@@ -7,7 +7,7 @@ import {
   EditOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Input, Space, Table, TableColumnsType } from "antd";
+import { Input, Space, Table, TableColumnsType,DatePicker,Select } from "antd";
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 interface DataType {
@@ -19,7 +19,7 @@ interface DataType {
   end: string;
   sum : string;
 }
-
+const { RangePicker } = DatePicker;
 const columns: TableColumnsType<DataType> = [
   {
     title: "STT",
@@ -139,12 +139,21 @@ export default function ReportDetail() {
       <FormItemCustom className="w-[320px] border-none mr-4 " >
         <Input placeholder="Tìm kiếm theo chiến dịch" prefix={<SearchOutlined />} />
       </FormItemCustom>
-      <FormItemCustom className="w-[200px] border-none mr-4" label="Thời gian thực hiện">
-        <Input style={{ height: '36px' }} placeholder="" />
+      <FormItemCustom className="w-[250px] border-none mr-4" label="Thời gian thực hiện">
+        <RangePicker />
       </FormItemCustom>
-      <FormItemCustom className="w-[200px] border-none" label="Nhân viên">
-        <Input style={{ height: '36px' }} placeholder="" />
-      </FormItemCustom>
+    
+  <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <label style={{paddingBottom: '5px'}}>Nhân viên:</label>
+    <Select className="w-[200px] h-[36px]">
+      <Select.Option value="demo">Nguyễn Văn A</Select.Option>
+      <Select.Option value="demo1">Nguyễn Văn B</Select.Option>
+      <Select.Option value="demo2">Nguyễn Văn C</Select.Option>
+      <Select.Option value="demo3">Nguyễn Văn D</Select.Option>
+
+    </Select>
+  </div>
+
     </div>
         <div className="p-4">
           <TableCustom

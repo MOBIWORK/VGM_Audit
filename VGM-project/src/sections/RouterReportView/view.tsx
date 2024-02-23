@@ -1,15 +1,14 @@
 import { VscAdd } from "react-icons/vsc";
 import { HeaderPage } from "../../components";
-import { LeftOutlined } from "@ant-design/icons";
+import { LeftOutlined,CaretRightOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { Form, Tabs ,Collapse } from "antd";
+import { Form, Tabs ,Collapse  } from "antd";
 import type { CollapseProps } from 'antd';
 import GeneralInformation from "./general-information";
 import Product from "./product";
 import Customer from "./customer-list";
 import EmployeeSell from "./employee-sale";
-
-
+import './view.css'; 
 export default function  ReportView() {
   const navigate = useNavigate();
   const onChange = (key: string | string[]) => {
@@ -24,12 +23,12 @@ export default function  ReportView() {
   const items: CollapseProps['items'] = [
     {
       key: '1',
-      label: 'Thông tin chung',
+      label: <span style={{ fontWeight: 700 }}>Thông tin chung</span>,
       children: <GeneralInformation form={form} />,
     },
     {
       key: '2',
-      label: 'Sản  phẩm',
+      label: <span style={{ fontWeight: 700 }}>Sản phẩm</span>,
       children: <Product
       // handleCustomer={setCustomerRouter}
       // listCustomer={customerRouter}
@@ -45,7 +44,7 @@ export default function  ReportView() {
         title="[Tên cửa hàng ] - [chiến dịch]"
         icon={
           <p
-            onClick={() => navigate("/campaign")}
+            onClick={() => navigate("/")}
             className="mr-2 cursor-pointer"
           >
             <LeftOutlined />
@@ -62,7 +61,7 @@ export default function  ReportView() {
       />
       <div className="bg-white  rounded-xl">
         <Form layout="vertical" form={form}>
-        <Collapse items={items} defaultActiveKey={['1']} onChange={onChange} />
+        <Collapse items={items} defaultActiveKey={['1']} onChange={onChange} className="custom-collapse"/>
           {/* <Tabs
             defaultActiveKey="1"
             items={[
