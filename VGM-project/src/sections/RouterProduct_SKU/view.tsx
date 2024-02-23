@@ -22,7 +22,7 @@ import {
   Typography,
   Upload,
   UploadProps,
-  Alert
+  message
 } from "antd";
 import { useState, useEffect } from "react";
 import Dragger from "antd/es/upload/Dragger";
@@ -31,6 +31,7 @@ import TextArea from "antd/es/input/TextArea";
 import { UploadFile } from "antd/lib";
 import  {AxiosService} from '../../services/server';
 import "./productsku.css";
+import JsBarcode from "jsbarcode";
 
 interface DataType {
   key: React.Key;
@@ -47,23 +48,33 @@ interface TypeCategory{
   owner: string;
   hidden: boolean;
 }
+interface TypeProduct{
+  key: React.Key;
+  name: string;
+  barcode: string;
+  category: string;
+  category_name: string;
+  product_code: string;
+  product_name: string;
+  product_description: string;
+}
 
 import type { GetProp } from "antd";
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-const columns: TableColumnsType<DataType> = [
+const columnProducts: TableColumnsType<DataType> = [
   {
     title: "Mã Sản phẩm",
-    dataIndex: "name",
+    dataIndex: "product_code",
     render: (text: string) => <a>{text}</a>,
   },
   {
     title: "Tên sản phẩm",
-    dataIndex: "age",
+    dataIndex: "product_name",
   },
   {
     title: "Danh mục",
-    dataIndex: "address",
+    dataIndex: "category_name",
   },
   {
     title: "Action",
@@ -81,32 +92,6 @@ const columns: TableColumnsType<DataType> = [
   },
 ];
 
-const data: DataType[] = [
-  {
-    key: "1",
-    name: "John Brown",
-    age: 32,
-    address: "New York No. 1 Lake Park",
-  },
-  {
-    key: "2",
-    name: "Jim Green",
-    age: 42,
-    address: "London No. 1 Lake Park",
-  },
-  {
-    key: "3",
-    name: "Joe Black",
-    age: 32,
-    address: "Sydney No. 1 Lake Park",
-  },
-  {
-    key: "4",
-    name: "Disabled User",
-    age: 99,
-    address: "Sydney No. 1 Lake Park",
-  },
-];
 // rowSelection object indicates the need for row selection
 const rowSelection = {
   onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
@@ -118,6 +103,8 @@ const rowSelection = {
   },
 };
 
+
+
 export default function Product_SKU() {
   const [selectionType, setSelectionType] = useState<"checkbox" | "radio">(
     "checkbox"
@@ -127,9 +114,10 @@ export default function Product_SKU() {
 
   const [form] = useForm();
   const [formEditCategory] = useForm();
+  const [formAddProduct] = useForm();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isModalOpen1, setIsModalOpen1] = useState(false);
+  const [isModalOpenAddProduct, setIsModalOpenAddProduct] = useState(false);
   const [isModalOpenAddCategory, setIsModalOpenAddCategory] = useState(false);
   //item and isShowModel for delete category
   const [deleteItemCategory, setDeleteItemCategory] = useState({});
@@ -140,6 +128,36 @@ export default function Product_SKU() {
 
   //biến cho sản phẩm theo danh mục
   const [categorySelected, setCategorySelected] = useState({});
+  const [products, setProducts] = useState<any[]>([]);
+  const [fileUploadAddProduct, setFileUploadAddProduct] = useState([]);
+
+  const propUploadAddProducts: UploadProps = {
+    onRemove: (file) => {},
+    beforeUpload: async (file) => {
+      const formData = new FormData();
+      const fields = {
+        file,
+        is_private: "0",
+        folder: "Home"
+      };
+  
+      for (const [key, value] of Object.entries(fields)) {
+        formData.append(key, value);
+      }
+      const response = await AxiosService.post(
+        "/api/method/upload_file",
+        formData
+      );
+      if (response.message) {
+        //fileListUpload.push(response.message);
+        setFileUploadAddProduct(prevFileUpload => [...prevFileUpload, response.message]);
+        message.success("Tải ảnh thành công");
+      } else {
+        message.error("Tải ảnh thất bại");
+      }
+      return false;
+    },
+  };
 
   //Các hàm xử lý danh mục
   const fetchDataCategories = async () => {
@@ -292,14 +310,61 @@ export default function Product_SKU() {
     setCategorySelected(item);
   }
 
+  useEffect(() => {
+    initDataProductByCategory();
+  }, [categorySelected]);
+
+  const initDataProductByCategory = async () => {
+    let urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"]]`;
+    let res = await AxiosService.get(urlProducts);
+    if (res && res.data) {
+      // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
+      let dataProducts: TypeProduct[] = res.data.map((item: TypeProduct) => {
+        return {
+          ...item,
+          key: item.name,
+          category_name: categorySelected.category_name
+        }
+      })
+      setProducts(dataProducts);
+    }
+  }
+
+  const showModalAddProduct = () => {
+    if(categorySelected != null && categorySelected.name != null){
+      setIsModalOpenAddProduct(true);
+    }
+  };
+
+  const handleOkAddProduct = async () => {
+    let objProduct = formAddProduct.getFieldsValue();
+    let barcode = document.getElementById("barcode");
+  
+    console.log(objProduct);
+    console.log(barcode);
+    console.log(fileUploadAddProduct);
+  };
+
+  const handleRenderBarcodeAddProduct = (event) => {
+    JsBarcode("#barcode",event.target.value, {
+      width: 4,
+      height: 40,
+      displayValue: true,
+      font: "Arial",
+      text: event.target.value,
+      textMargin: 10,
+      fontSize: 13,
+      background: "#F5F7FA"
+    });
+  }
+
+  const handleCancelAddProduct = () => {
+    setIsModalOpenAddProduct(false);
+  };
+
   const showModal = () => {
     setIsModalOpen(true);
   };
-
-  const showModal1 = () => {
-    setIsModalOpen1(true);
-  };
-
   
   const handleOk = () => {
     setIsModalOpen(false);
@@ -308,27 +373,18 @@ export default function Product_SKU() {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
-
-  const handleOk1 = () => {
-    setIsModalOpen1(false);
-  };
-
-  const handleCancel1 = () => {
-    setIsModalOpen1(false);
-  };
-
   
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
-  const [fileList, setFileList] = useState<UploadFile[]>([
-    {
-      uid: "-1",
-      name: "image.png",
-      status: "done",
-      url: "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
-    },
-  ]);
+  // {
+  //   uid: "-1",
+  //   name: "image.png",
+  //   status: "done",
+  //   url: "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
+  // },
 
-  const onChange1: UploadProps["onChange"] = ({ fileList: newFileList }) => {
+  const onChangeImageFormAddProduct: UploadProps["onChange"] = ({ fileList: newFileList }) => {
+    console.log(newFileList);
     setFileList(newFileList);
   };
 
@@ -359,6 +415,7 @@ export default function Product_SKU() {
             size: "20px",
             className: "flex items-center mr-2",
             danger: true,
+            hidden: true
           },
           {
             label: "Nhập file",
@@ -380,7 +437,7 @@ export default function Product_SKU() {
             icon: <VscAdd className="text-xl" />,
             size: "20px",
             className: "flex items-center",
-            action: showModal1,
+            action: showModalAddProduct,
           },
         ]}
       />
@@ -399,8 +456,8 @@ export default function Product_SKU() {
                   type: selectionType,
                   ...rowSelection,
                 }}
-                columns={columns}
-                dataSource={data}
+                columns={columnProducts}
+                dataSource={products}
               />
             </div>
           </div>
@@ -477,41 +534,59 @@ export default function Product_SKU() {
 
       <Modal
         title={"Thêm mới sản phẩm"}
-        open={isModalOpen1}
-        onOk={handleOk1}
-        onCancel={handleCancel1}
+        open={isModalOpenAddProduct}
+        onOk={handleOkAddProduct}
+        onCancel={handleCancelAddProduct}
         width={1000}
         footer={[
-          <Button key="back" onClick={handleCancel1}>
+          <Button key="back" onClick={handleCancelAddProduct}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOk1}>
+          <Button key="submit" type="primary" onClick={handleOkAddProduct}>
             Lưu
           </Button>,
         ]}
       >
         <div className="pt-4">
-          <Form layout="vertical" form={form}>
-            <FormItemCustom label="Mã sản phâm" name="channel_code" required>
+          <Form layout="vertical" form={formAddProduct}>
+            <FormItemCustom label="Mã sản phâm" name="product_code" required>
               <Input />
             </FormItemCustom>
             <FormItemCustom
               className="pt-3"
               label="Barcode"
-              name="bar-code"
+              name="barcode_product"
               required
             >
-              <Input />
+              <Input onChange={(event) => handleRenderBarcodeAddProduct(event)}/>
             </FormItemCustom>
+            <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: "10px",
+                  marginTop: "10px",
+                  backgroundColor: "#F5F7FA",
+                  borderWidth: "1px",
+                  borderStyle: "solid",
+                  borderColor: "#d9d9d9",
+                  borderRadius: "6px",
+                  height: "85px"
+                }}
+              >
+                <svg id="barcode"></svg></div>
+            
             <FormItemCustom
               className="pt-3"
               label="Tên sản phẩm"
-              name="name_item"
+              name="product_name"
               required
             >
               <Input />
             </FormItemCustom>
-            <FormItemCustom className="pt-3" label="Mô tả" name="des" required>
+            <FormItemCustom className="pt-3" label="Mô tả" name="product_description" required>
               <TextArea className="bg-[#F5F7FA]" autoSize={{ minRows: 3, maxRows: 5 }} />
             </FormItemCustom>
             <FormItemCustom
@@ -520,11 +595,11 @@ export default function Product_SKU() {
               name="img"
               required
             >
-              <Upload
+              <Upload {...propUploadAddProducts}
                 action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
                 listType="picture-card"
                 fileList={fileList}
-                onChange={onChange1}
+                onChange={onChangeImageFormAddProduct}
                 onPreview={onPreview}
               >
                 {fileList.length < 5 && "+ Upload"}
