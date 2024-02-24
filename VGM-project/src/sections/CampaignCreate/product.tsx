@@ -119,6 +119,7 @@ export default function Product() {
       if(item != null && item.length > 0) arrCategorySelect.push(item[0]);
     }
     setCategoriesSelected(arrCategorySelect);
+    console.log(arrCategorySelect);
     handleCancelAddCategory();
   }
 
@@ -135,12 +136,21 @@ export default function Product() {
     setIsModalOpenCategory(false);
   };
 
-  const expandedRowRender = (dataProducts) => {
+  const handleDeleteCategory = (item) => {
+    console.log(item);
+    for(let i = 0; i < categoriesSelected.length; i++){
+      if(categoriesSelected[i].name == item.name) categoriesSelected.splice(i, 1);
+    }
+    console.log(categoriesSelected);
+    setCategoriesSelected(categoriesSelected);
+  }
+
+  const expandedRowRender = (record, index) => {
     const columnProducts: TableColumnsType<ExpandedDataType> = [
       { title: "Mã sản phẩm", dataIndex: "product_code", key: "product_code" },
       { title: "Tên sản phẩm", dataIndex: "product_name", key: "product_name" },
     ];
-    return <Table columns={columnProducts} dataSource={dataProducts} pagination={false} />;
+    return <Table columns={columnProducts} dataSource={record.products} pagination={false} />;
   };
 
   const columnCategories: TableColumnsType<DataType> = [
@@ -150,9 +160,9 @@ export default function Product() {
     {
       title: "",
       key: "",
-      render: () => (
+      render: (item) => (
         <a>
-          <DeleteOutlined />
+          <DeleteOutlined onClick={() => handleDeleteCategory(item)}/>
         </a>
       ),
     },
