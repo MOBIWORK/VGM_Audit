@@ -74,42 +74,57 @@ export default function Product(props) {
     }
     return <Table columns={columns} dataSource={data} pagination={false} />;
   };
-
-  const columns: TableColumnsType<DataType> = [
-    { title: "STT", dataIndex: "stt", key: "STT" },
-    { title: "Danh mục sản phẩm", dataIndex: "category", key: "product" },
-    { title: "Số lượng sản phẩm", dataIndex: "quantity", key: "quantity" },
-    {
-      title: "",
-      key: "",
-     
-    },
-  ];
-
-  const columns1: TableColumnsType<DataType> = [
-    { title: "Danh mục sản phẩm", dataIndex: "category", key: "product" },
-    { title: "Số lượng sản phẩm", dataIndex: "quantity", key: "quantity" },
-  ];
-
-  const data: DataType[] = [];
-  for (let i = 0; i < props.recordData?.category_names.length; ++i) {
-    let categoryObject = props.recordData.category_names[i];
-    let categoryName = Object.values(categoryObject)[0]; // Lấy giá trị tên danh mục từ đối tượng
-    data.push({
-      key: i.toString(),
-      stt: (i + 1).toString(),
-      category: categoryName,
-      quantity: 190
-    });
-}
-
+  const mainTableData = props.recordData?.category_names.map((category, index) => ({
+    key: index.toString(),
+    stt: (index + 1).toString(),
+    categoryName: Object.values(category)[0]
+  }));
+  const expandedColumns = [
+    { title: "STT", dataIndex: "stt" },
+    { title: "Tên sản phẩm", dataIndex: "name_product" },
+    { title: "Số lượng sản phẩm máy chấm", dataIndex: "sum_product" },
+    { title: "Ảnh trưng bày", dataIndex: "image",  render: (image) => (
+      <a>
+        {JSON.parse(image)}
+      </a>
+    ), },
+];
+// Các cột cho bảng chính
+const mainColumns = [
+  { title: "STT", dataIndex: "stt" },
+  { title: "Danh mục sản phẩm", dataIndex: "categoryName" }
+];
+// Xây dựng dữ liệu mở rộng cho mỗi danh mục sản phẩm
+const expandedRowData = props.recordData?.category_names.map((category, index) => {
+  const categoryCode = Object.keys(category)[0];
+  const details = props.recordData?.detail.filter(item => item.category === categoryCode);
+  return details.map((detailItem, detailIndex) => ({
+      key: `${index}-${detailIndex}`,
+      stt: `${index+1}`,
+      name_product: detailItem.product_name,
+      sum_product: detailItem.sum_product.toString(),
+      image: detailItem.images,
+      creation: detailItem.creation,
+      // Các trường dữ liệu khác của chi tiết
+  }));
+});
   return (
    
       < >
         <TableCustom
-          columns={columns}
-          expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
-          dataSource={data}
+          columns={mainColumns}
+          expandable={{
+            expandedRowRender: (record, index) => (
+                <Table
+                    columns={expandedColumns}
+                    dataSource={expandedRowData[index]}
+                    pagination={false}
+                />
+            ),
+            rowExpandable: (record) => expandedRowData[record.key].length > 0
+        }}
+          // expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
+          dataSource={mainTableData}
         />
       </>
     

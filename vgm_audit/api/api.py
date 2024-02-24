@@ -227,9 +227,12 @@ def get_list_reports():
             campaign_code = report.get("campaign_code")
             campaign_name = frappe.get_value("VGM_Campaign", filters={"name": campaign_code}, fieldname="campaign_name")
             report["campaign_name"] = campaign_name
-            
-            # Lấy dữ liệu từ child table
             children_data = frappe.get_all("VGM_ReportDetailSKU", filters={"parent": report.name}, fields=["*"])
+            for child in children_data:
+                product_code = child.get("product")
+                product_name = frappe.get_value("VGM_Product", {"name": product_code}, "product_name")
+                child["product_name"] = product_name
+                          
             # Thêm dữ liệu từ child table vào bản ghi
             report["detail"] = children_data
 
