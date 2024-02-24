@@ -11,7 +11,8 @@ import {
   TableColumnsType,
 } from "antd";
 import { FormItemCustom, TableCustom } from "../../components";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { AxiosService } from "../../services/server";
 
 interface DataType {
   key: React.Key;
@@ -26,57 +27,126 @@ interface ExpandedDataType {
   name: string;
 }
 
+interface TypeCategory{
+  key: React.Key;
+  name: string;
+  category_name: string;
+  product_num: number;
+  products: Array<TypeProduct>;
+}
+interface TypeProduct{
+  key: React.Key;
+  name: string;
+  product_code: string;
+  product_name: string;
+}
+
 const items = [
   { key: "1", label: "Action 1" },
   { key: "2", label: "Action 2" },
 ];
 
 export default function Product() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenCategory, setIsModalOpenCategory] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
+  const [categories, setCategories] = useState<TypeCategory[]>([]);
+  const [searchCategory, setSearchCategory] = useState("");
+  const [categoriesSelected, setCategoriesSelected] = useState<TypeCategory[]>([]);
+
+  useEffect(() => {
+    initDataCategories();
+  }, []);
+
+  useEffect(() => {
+    initDataCategories();
+  }, [searchCategory]);
+
+  const initDataCategories = async () => {
+    let urlCategory = '/api/resource/VGM_Category?fields=["*"]';
+    if(searchCategory != null && searchCategory != ""){
+      urlCategory += `&filters=[["category_name", "like", "%${searchCategory}%"]]`;
+    }
+    const response = await AxiosService.get(urlCategory);
+      // Kiểm tra xem kết quả từ API có chứa dữ liệu không
+      if (response && response.data) {
+        // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
+        let dataCategories: TypeCategory[] = response.data.map((item: TypeCategory) => {
+          return {
+            ...item,
+            key: item.name
+          }
+        })
+        for(let i = 0; i < dataCategories.length; i++){
+          let urlProduct = `/api/resource/VGM_Product?fields=["name","product_code","product_name"]&&filters=[["category","=","${dataCategories[i].name}"]]`;
+          let res = await AxiosService.get(urlProduct);
+          if(res != null && res.data != null){
+            dataCategories[i].product_num = res.data.length;
+            let arrProducts: TypeProduct[] = res.data.map((item: TypeProduct) => {
+              return {
+                ...item,
+                key: item.name
+              }
+            })
+            dataCategories[i].products = arrProducts;
+          } 
+          else{
+            dataCategories[i].product_num = 0;
+            dataCategories[i].products = [];
+          } 
+        }
+        setCategories(dataCategories);
+      }
+  }
+
+  const handleSearchCategory = (event) => {
+    setSearchCategory(event.target.value);
+  }
+
+  const onSelectChangeCategory = (newSelectedRowKeys: React.Key[], selectedRow: TypeCategory[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
-  const rowSelection = {
+  const rowSelectionCategory = {
     selectedRowKeys,
-    onChange: onSelectChange,
-  };
-  const hasSelected = selectedRowKeys.length > 0;
-  const showModal = () => {
-    setIsModalOpen(true);
+    onChange: onSelectChangeCategory,
   };
 
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-  const expandedRowRender = () => {
-    const columns: TableColumnsType<ExpandedDataType> = [
-      { title: "Mã sản phẩm", dataIndex: "date", key: "date" },
-      { title: "Tên sản phẩm", dataIndex: "name", key: "name" },
-    ];
-
-    const data = [];
-    for (let i = 0; i < 3; ++i) {
-      data.push({
-        key: i.toString(),
-        date: "2014-12-24 23:12:00",
-        name: "This is production name",
-      });
+  const handleSelectCategory = () => {
+    let arrCategorySelect: TypeCategory[] = [];
+    for(let i = 0; i < selectedRowKeys.length; i++){
+      let item = categories.filter(x => x.name == selectedRowKeys[i]);
+      if(item != null && item.length > 0) arrCategorySelect.push(item[0]);
     }
-    return <Table columns={columns} dataSource={data} pagination={false} />;
+    setCategoriesSelected(arrCategorySelect);
+    handleCancelAddCategory();
+  }
+
+  const hasSelected = selectedRowKeys.length > 0;
+  const showModalCategory = () => {
+    setIsModalOpenCategory(true);
   };
 
-  const columns: TableColumnsType<DataType> = [
+  const handleOkAddCategory = () => {
+    setIsModalOpenCategory(false);
+  };
+
+  const handleCancelAddCategory = () => {
+    setIsModalOpenCategory(false);
+  };
+
+  const expandedRowRender = (dataProducts) => {
+    const columnProducts: TableColumnsType<ExpandedDataType> = [
+      { title: "Mã sản phẩm", dataIndex: "product_code", key: "product_code" },
+      { title: "Tên sản phẩm", dataIndex: "product_name", key: "product_name" },
+    ];
+    return <Table columns={columnProducts} dataSource={dataProducts} pagination={false} />;
+  };
+
+  const columnCategories: TableColumnsType<DataType> = [
     { title: "STT", dataIndex: "stt", key: "STT" },
-    { title: "Danh mục sản phẩm", dataIndex: "product", key: "product" },
-    { title: "Số lượng sản phẩm", dataIndex: "quantity", key: "quantity" },
+    { title: "Danh mục sản phẩm", dataIndex: "category_name", key: "category_name" },
+    { title: "Số lượng sản phẩm", dataIndex: "product_num", key: "product_num" },
     {
       title: "",
       key: "",
@@ -87,27 +157,11 @@ export default function Product() {
       ),
     },
   ];
-
-  const columns1: TableColumnsType<DataType> = [
-    { title: "Danh mục sản phẩm", dataIndex: "product", key: "product" },
-    { title: "Số lượng sản phẩm", dataIndex: "quantity", key: "quantity" },
-  ];
-
-  const data: DataType[] = [];
-  for (let i = 0; i < 3; ++i) {
-    data.push({
-      key: i.toString(),
-      stt: "Screen",
-      product: "iOS",
-      quantity: "10.3.4.5654",
-    });
-  }
-
   return (
     <div className="pt-4">
       <p className="ml-4 font-semibold text-sm text-[#212B36]">Sản phẩm</p>
       <div
-        onClick={showModal}
+        onClick={showModalCategory}
         className="flex justify-center h-9 cursor-pointer items-center ml-4 border-solid border-[1px] border-indigo-600 rounded-xl w-[160px]"
       >
         <p className="mr-2">
@@ -117,23 +171,24 @@ export default function Product() {
       </div>
       <div className="pt-6 ml-4">
         <TableCustom
-          columns={columns}
+          columns={columnCategories}
           expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
-          dataSource={data}
+          dataSource={categoriesSelected}
         />
       </div>
+
       <Modal
         width={990}
-        title="Chọn danh mục"
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
+        title="Chọn danh mục sản phẩm"
+        open={isModalOpenCategory}
+        onOk={handleOkAddCategory}
+        onCancel={handleCancelAddCategory}
         footer={false}
       >
         <div className="flex items-center justify-between">
           <FormItemCustom className="w-[320px] border-none pt-4">
-            <Input
-              placeholder="Tìm kiếm sản phẩm"
+            <Input value={searchCategory} onChange={handleSearchCategory}
+              placeholder="Tìm kiếm danh mục sản phẩm"
               prefix={<SearchOutlined />}
             />
           </FormItemCustom>
@@ -141,11 +196,14 @@ export default function Product() {
             <span style={{ marginRight: 8 }}>
               {hasSelected ? `Đã chọn ${selectedRowKeys.length} danh mục` : ""}
             </span>
-            <Button type="primary">Thêm</Button>
+            <Button type="primary" onClick={handleSelectCategory}>Thêm</Button>
           </div>
         </div>
         <div className="pt-4">
-            <TableCustom rowSelection={rowSelection} columns={columns1} dataSource={data} />
+          <TableCustom rowSelection={rowSelectionCategory} columns={[
+              { title: "Danh mục sản phẩm", dataIndex: "category_name", key: "category_name" },
+              { title: "Số lượng sản phẩm", dataIndex: "product_num", key: "product_num" },
+            ]} dataSource={categories} />
         </div>
       </Modal>
     </div>

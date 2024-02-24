@@ -7,13 +7,20 @@ import GeneralInformation from "./general-information";
 import Product from "./product";
 import Customer from "./customer-list";
 import EmployeeSell from "./employee-sale";
+import React, {useState} from 'react';
 
 export default function  CampaignCreate() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const [campaignStatus, setCampaignStatus] = useState("Open");
 
   const handleAddCampaign = async () => {
     console.log(form.getFieldsValue());
+    console.log(campaignStatus);
+  }
+
+  const handleCampaignStatusChange = (val) => {
+    setCampaignStatus(val);
   }
 
   return (
@@ -46,7 +53,7 @@ export default function  CampaignCreate() {
               {
                 label: <p className="px-4 mb-0"> Thông tin chung</p>,
                 key: "1",
-                children: <GeneralInformation form={form} />,
+                children: <GeneralInformation form={form} onCampaignStatusChange={handleCampaignStatusChange}/>,
               },
               {
                 label: <p className="px-4 mb-0">Sản phẩm</p>,
