@@ -28,6 +28,7 @@ interface ExpandedDataType {
 }
 
 interface TypeCategory{
+  stt: number;
   key: React.Key;
   name: string;
   category_name: string;
@@ -41,12 +42,7 @@ interface TypeProduct{
   product_name: string;
 }
 
-const items = [
-  { key: "1", label: "Action 1" },
-  { key: "2", label: "Action 2" },
-];
-
-export default function Product() {
+export default function Product({onChangeCategory}) {
   const [isModalOpenCategory, setIsModalOpenCategory] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
@@ -116,10 +112,13 @@ export default function Product() {
     let arrCategorySelect: TypeCategory[] = [];
     for(let i = 0; i < selectedRowKeys.length; i++){
       let item = categories.filter(x => x.name == selectedRowKeys[i]);
-      if(item != null && item.length > 0) arrCategorySelect.push(item[0]);
+      if(item != null && item.length > 0){
+        item[0].stt = arrCategorySelect.length + 1;
+        arrCategorySelect.push(item[0]);
+      } 
     }
     setCategoriesSelected(arrCategorySelect);
-    console.log(arrCategorySelect);
+    onChangeCategory(arrCategorySelect);
     handleCancelAddCategory();
   }
 
@@ -137,12 +136,9 @@ export default function Product() {
   };
 
   const handleDeleteCategory = (item) => {
-    console.log(item);
-    for(let i = 0; i < categoriesSelected.length; i++){
-      if(categoriesSelected[i].name == item.name) categoriesSelected.splice(i, 1);
-    }
-    console.log(categoriesSelected);
-    setCategoriesSelected(categoriesSelected);
+    const updatedCategoriesSelected = categoriesSelected.filter(category => category.name !== item.name);
+    setCategoriesSelected(updatedCategoriesSelected);
+    onChangeCategory(updatedCategoriesSelected);
   }
 
   const expandedRowRender = (record, index) => {
@@ -154,7 +150,7 @@ export default function Product() {
   };
 
   const columnCategories: TableColumnsType<DataType> = [
-    { title: "STT", dataIndex: "stt", key: "STT" },
+    { title: "STT", dataIndex: "stt", key: "stt" },
     { title: "Danh mục sản phẩm", dataIndex: "category_name", key: "category_name" },
     { title: "Số lượng sản phẩm", dataIndex: "product_num", key: "product_num" },
     {

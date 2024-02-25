@@ -6,6 +6,7 @@ import DashboardLayout from '@/layouts/dashboard'
 import {LoadingScreen} from '@/components'
 import { Button, Result } from 'antd';
 import useCookie from '../../hooks/useCookie';
+import CampaignEdit from "../../sections/CampaignEdit/view";
 
 const RouterControl = lazy(()=> import('@/pages/RouterControl'))
 const RouterCreate = lazy(()=> import('@/pages/RouterCreate'))
@@ -58,6 +59,9 @@ export const dashboardRoutes = [
             },
             {
                 path: 'campaign-create', element: <CampaignCreate />
+            },
+            {
+                path: 'campaign-edit/:name', element: <CampaignEdit />
             },
             {
                 path: 'report-view', element: <ReportView />

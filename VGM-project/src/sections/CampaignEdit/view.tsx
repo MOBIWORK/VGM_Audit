@@ -1,30 +1,64 @@
 import { HeaderPage } from "../../components";
 import { LeftOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Form, Tabs, message } from "antd";
-import GeneralInformation from "./general-information";
-import Product from "./product";
-import Customer from "./customer-list";
-import EmployeeSell from "./employee-sale";
-import {useState} from 'react';
+import GeneralInformationCampaignEdit from "./general-information";
+import ProductCampaignEdit from "./product";
+import CustomerCampaignEdit from "./customer-list";
+import EmployeeSellCampaignEdit from "./employee-sale";
+import {useEffect, useState} from 'react';
 import { AxiosService } from "../../services/server";
+import moment from 'moment';
 
-export default function  CampaignCreate() {
+export default function CampaignEdit() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const {name} = useParams();
   const [campaignStatus, setCampaignStatus] = useState("Open");
   const [categoriesSelected, setCategoriesSelected] = useState([]);
   const [employeesSelected, setEmployeesSelected] = useState([]);
   const [customersSelected, setCustomersSelected] = useState([]);
 
-  const handleAddCampaign = async () => {
+  //init data
+  const [statusCampaignEdit, setStatusCampaignEdit] = useState("");
+  const [categoryEdit, setCategoryEdit] = useState([]);
+  const [employeeEdit, setEmployeeEdit] = useState([]);
+  const [customerEdit, setCustomerEdit] = useState([]);
+
+  useEffect(() => {
+    initDataByIdCampaign();
+  }, [name]);
+
+  const initDataByIdCampaign = async () => {
+    let urlDetailCampaign = `/api/resource/VGM_Campaign/${name}`;
+    let res = await AxiosService(urlDetailCampaign);
+    if(res != null && res.data != null){
+        form.setFieldsValue({
+            'campaign_name': res.data.campaign_name,
+            'campaign_description': res.data.campaign_description,
+            'campaign_start': convertDateFormat(res.data.start_date),
+            'campaign_end': convertDateFormat(res.data.end_date)
+        })
+        setStatusCampaignEdit(res.data.campaign_status);
+        setCategoryEdit(JSON.parse(res.data.products));
+        setEmployeeEdit(JSON.parse(res.data.employees));
+        setCustomerEdit(JSON.parse(res.data.retails));
+    }
+  }
+
+  const convertDateFormat = (val) => {
+    const datePickerDate = moment(val, 'YYYY-MM-DD HH:mm:ss');
+    return datePickerDate;
+  }
+
+  const handleEditCampaign = async () => {
     let objFrm = form.getFieldsValue();
     let arrCategory = categoriesSelected.map(x => x.name);
     let arrEmployee = employeesSelected.map(x => x.name);
     let arrCustomer = customersSelected.map(x => x.name);
 
-    let urlPostData = "/api/resource/VGM_Campaign";
-    let dataPost = {
+    let urlPutData = `/api/resource/VGM_Campaign/${name}`;
+    let dataPut = {
       'campaign_name': objFrm.campaign_name,
       'campaign_description': objFrm.campaign_description,
       'start_date': convertDate(objFrm.campaign_start),
@@ -34,12 +68,12 @@ export default function  CampaignCreate() {
       'employees': JSON.stringify(arrEmployee),
       'retails': JSON.stringify(arrCustomer)
     }
-    let res = await AxiosService.post(urlPostData, dataPost);
+    let res = await AxiosService.put(urlPutData, dataPut);
     if(res != null && res.data != null){
-      message.success("Thêm mới thành công");
+      message.success("Cập nhật thành công");
       navigate('/campaign');
     }else{
-      message.error("Thêm mới thất bại");
+      message.error("Cập nhật thất bại");
     }
   }
 
@@ -71,7 +105,7 @@ export default function  CampaignCreate() {
   return (
     <>
       <HeaderPage
-        title="Thêm mới chiến dịch"
+        title="Sửa chiến dịch"
         icon={
           <p
             onClick={() => navigate("/campaign")}
@@ -82,11 +116,11 @@ export default function  CampaignCreate() {
         }
         buttons={[
           {
-            label: "Thêm mới",
+            label: "Lưu lại",
             type: "primary",
             size: "20px",
             className: "flex items-center",
-            action: handleAddCampaign
+            action: handleEditCampaign
           },
         ]}
       />
@@ -98,13 +132,13 @@ export default function  CampaignCreate() {
               {
                 label: <p className="px-4 mb-0"> Thông tin chung</p>,
                 key: "1",
-                children: <GeneralInformation form={form} onCampaignStatusChange={handleCampaignStatusChange}/>,
+                children: <GeneralInformationCampaignEdit form={form} statusCampaign={statusCampaignEdit} onCampaignStatusChange={handleCampaignStatusChange}/>,
               },
               {
                 label: <p className="px-4 mb-0">Sản phẩm</p>,
                 key: "2",
                 children: (
-                  <Product onChangeCategory={handleChangeCategory}
+                  <ProductCampaignEdit onChangeCategory={handleChangeCategory} categoryEdit={categoryEdit}
                   />
                 ),
               },
@@ -112,7 +146,7 @@ export default function  CampaignCreate() {
                 label: <p className="px-4 mb-0">Nhân viên bán hàng</p>,
                 key: "3",
                 children: (
-                  <EmployeeSell onChangeEmployees={handleChangeEmployee}
+                  <EmployeeSellCampaignEdit onChangeEmployees={handleChangeEmployee} employeeEdit={employeeEdit}
                   />
                 ),
               },
@@ -120,7 +154,7 @@ export default function  CampaignCreate() {
                 label: <p className="px-4 mb-0">Khách hàng</p>,
                 key: "4",
                 children: (
-                  <Customer onChangeCustomer={hangleChangeCustomer}
+                  <CustomerCampaignEdit onChangeCustomer={hangleChangeCustomer} customerEdit={customerEdit}
                   />
                 ),
               },

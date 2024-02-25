@@ -122,7 +122,7 @@ export default function Campaign() {
   }
 
   const handleEditCampaign = (item) => {
-    console.log(item);
+    navigate(`/campaign-edit/${item.name}`);
   }
 
   const handleDeleteCampaign = (item) => {

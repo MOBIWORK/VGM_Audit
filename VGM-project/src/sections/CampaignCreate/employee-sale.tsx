@@ -5,91 +5,151 @@ import {
 } from "@ant-design/icons";
 import { FormItemCustom, TableCustom } from "../../components";
 import { Button, Input, Modal, TableProps } from "antd";
-import { useState } from "react";
-interface DataType {
-  key: string;
+import { useEffect, useState } from "react";
+import { AxiosServiceMBW } from "../../services/server";
+
+interface TypeEmployee{
+  key?: React.Key;
   name: string;
-  age: string;
-  address: string;
-  tags: string;
+  employee_name: string;
+  email: string
 }
 
-const columns: TableProps<DataType>["columns"] = [
+const columnEmployees: TableProps<TypeEmployee>["columns"] = [
   {
-    title: "Tên nhân viên",
+    title: "Mã nhân viên",
     dataIndex: "name",
     key: "name",
     render: (text: string) => <a>{text}</a>,
   },
   {
-    title: "Trạng thái",
-    dataIndex: "age",
-    key: "age",
+    title: "Tên nhân viên",
+    dataIndex: "employee_name",
+    key: "employee_name",
   },
   {
-    title: "Chức vụ",
-    dataIndex: "address",
-    key: "address",
-  },
-  {
-    title: "ID",
-    key: "tags",
-    dataIndex: "tags",
-  },
-  {
-    title: "",
-    key: "action",
-    render: (_, record) => (
-      <a>
-        <DeleteOutlined />
-      </a>
-    ),
-  },
+    title: "Email",
+    dataIndex: "email",
+    key: "email",
+  }
 ];
 
-const data: DataType[] = [
-  {
-    key: "1",
-    name: "John Brown",
-    age: "32",
-    address: "New York No. 1 Lake Park",
-    tags: "nike",
-  },
-  {
-    key: "2",
-    name: "Jim Green",
-    age: "42",
-    address: "London No. 1 Lake Park",
-    tags: "loser",
-  },
-  {
-    key: "3",
-    name: "Joe Black",
-    age: "32",
-    address: "Sydney No. 1 Lake Park",
-    tags: "cool",
-  },
-];
-export default function EmployeeSell() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function EmployeeSell({onChangeEmployees}) {
+  const [isModalOpenAddEmployee, setIsModalOpenAddEmployee] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [employees, setEmployees] = useState<TypeEmployee[]>([]);
+  const [employeesTemp, setEmployeesTemp] = useState<TypeEmployee[]>([]);
+  const [searchEmployee, setSearchEmployee] = useState("");
+  const [employeeSelected, setEmployeeSelected] = useState<TypeEmployee[]>([]);
 
-  const showModal = () => {
-    setIsModalOpen(true);
+  const columnEmployeesSelect: TableProps<TypeEmployee>["columns"] = [
+    {
+      title: "Mã nhân viên",
+      dataIndex: "name",
+      key: "name",
+      render: (text: string) => <a>{text}</a>,
+    },
+    {
+      title: "Tên nhân viên",
+      dataIndex: "employee_name",
+      key: "employee_name",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "",
+      key: "",
+      render: (item) => (
+        <a>
+          <DeleteOutlined onClick={() => handleDeleteEmployeeSelected(item)}/>
+        </a>
+      ),
+    }
+  ]; 
+
+  useEffect(() => {
+    initDataEmployee();
+  }, []);
+
+  useEffect(() => {
+    let employeeFilter = employeesTemp;
+    if(searchEmployee != null && searchEmployee != ""){
+      employeeFilter = employeesTemp.filter(x => x.employee_name.toLowerCase().includes(searchEmployee.toLowerCase()));
+    }
+    setEmployees(employeeFilter);
+  }, [searchEmployee]);
+
+  const initDataEmployee = async () => {
+    let urlEmployee = "api/method/mbw_service_v2.api.ess.employee.get_list_employee";
+    //let res = await AxiosServiceMBW.get(urlEmployee);
+    let arrEmployee: TypeEmployee[] = [
+      {
+        "email": "hoanganh@gmail.com",
+        "name": "HR-EMP-00014",
+        "employee_name": "Hoàng Anh"
+      },{
+        "email": "hapt@mbw.vn",
+        "name": "HR-EMP-00013",
+        "employee_name": "Hà PT"
+      },{
+        "email": "lamthatnhanh111@gmail.com",
+        "name": "HR-EMP-00012",
+        "employee_name": "Vương Linh"
+      },{
+        "email": "haudang130197@gmail.com",
+        "name": "HR-EMP-00011",
+        "employee_name": "Đặng Hậu"
+      }
+    ]
+    let arrEmployeeSource = arrEmployee.map((item: TypeEmployee) => {
+      return {
+        ...item,
+        key: item.name
+      }
+    });
+    setEmployees(arrEmployeeSource);
+    setEmployeesTemp(arrEmployeeSource);
+  }
+
+  const showModalAddEmployee = () => {
+    setIsModalOpenAddEmployee(true);
   };
 
-  const handleOk = () => {
-    setIsModalOpen(false);
+  const handleOkAddEmployee = () => {
+    setIsModalOpenAddEmployee(false);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
+  const handleCancelAddEmployee = () => {
+    setIsModalOpenAddEmployee(false);
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    console.log("selectedRowKeys changed: ", newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
+
+  const onChangeSearch = (event) => {
+    setSearchEmployee(event.target.value);
+  }
+
+  const handleAddEmployee = () => {
+    let employeeSelecteds: TypeEmployee[] = [];
+    for(let i = 0; i < selectedRowKeys.length; i++ ){
+      let employeeFilter = employees.filter(x => x.name == selectedRowKeys[i]);
+      if(employeeFilter != null && employeeFilter.length > 0) employeeSelecteds.push(employeeFilter[0]);
+    }
+    setEmployeeSelected(employeeSelecteds);
+    onChangeEmployees(employeeSelecteds);
+    handleCancelAddEmployee();
+  }
+
+  const handleDeleteEmployeeSelected = (item) => {
+    const updatedEmployeeSelected = employeeSelected.filter(employee => employee.name !== item.name);
+    setEmployeeSelected(updatedEmployeeSelected);
+    onChangeEmployees(updatedEmployeeSelected);
+  }
 
   const rowSelection = {
     selectedRowKeys,
@@ -104,7 +164,7 @@ export default function EmployeeSell() {
           Danh sách nhân viên
         </p>
         <div
-          onClick={showModal}
+          onClick={showModalAddEmployee}
           className="flex justify-center h-9 cursor-pointer items-center ml-4 border-solid border-[1px] border-indigo-600 rounded-xl w-[160px]"
         >
           <p className="mr-2">
@@ -113,20 +173,21 @@ export default function EmployeeSell() {
           <p className="text-sm font-bold text-[#1877F2]">Chọn nhân viên</p>
         </div>
         <div className="pt-6 ml-4">
-          <TableCustom columns={columns} dataSource={data} />;
+          <TableCustom columns={columnEmployeesSelect} dataSource={employeeSelected} />;
         </div>
+
         <Modal
           width={990}
           title="Chọn nhân viên"
-          open={isModalOpen}
-          onOk={handleOk}
-          onCancel={handleCancel}
+          open={isModalOpenAddEmployee}
+          onOk={handleOkAddEmployee}
+          onCancel={handleCancelAddEmployee}
           footer={false}
         >
           <div className="flex items-center justify-between">
             <FormItemCustom className="w-[320px] border-none pt-4">
-              <Input
-                placeholder="Tìm kiếm sản phẩm"
+              <Input value={searchEmployee} onChange={onChangeSearch}
+                placeholder="Tìm kiếm tên nhân viên"
                 prefix={<SearchOutlined />}
               />
             </FormItemCustom>
@@ -136,14 +197,14 @@ export default function EmployeeSell() {
                   ? `Đã chọn ${selectedRowKeys.length} nhân viên`
                   : ""}
               </span>
-              <Button type="primary">Thêm</Button>
+              <Button type="primary" onClick={handleAddEmployee}>Thêm</Button>
             </div>
           </div>
           <div className="pt-4">
             <TableCustom
               rowSelection={rowSelection}
-              columns={columns}
-              dataSource={data}
+              columns={columnEmployees}
+              dataSource={employees}
             />
           </div>
         </Modal>

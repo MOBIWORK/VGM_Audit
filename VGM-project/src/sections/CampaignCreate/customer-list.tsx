@@ -5,83 +5,97 @@ import {
 } from "@ant-design/icons";
 import { FormItemCustom, TableCustom } from "../../components";
 import { Button, Input, Modal, TableProps } from "antd";
-import { useState } from "react";
-interface DataType {
-  key: string;
+import { useEffect, useState } from "react";
+
+interface TypeCustomer {
+  key: React.Key;
   name: string;
-  age: string;
-  address: string;
-  tags: string;
-  tara: string;
+  customer_name: string;
+  customer_group: string;
+  customer_primary_address: string;
+  customer_code: string;
 }
 
-const columns: TableProps<DataType>["columns"] = [
-  {
-    title: "Tên khách hàng",
-    dataIndex: "name",
-    key: "name",
-    render: (text: string) => <a>{text}</a>,
-  },
-  {
-    title: "Trạng thái",
-    dataIndex: "age",
-    key: "age",
-  },
-  {
-    title: "Nhóm khách hàng",
-    dataIndex: "address",
-    key: "address",
-  },
-  {
-    title: "Địa chỉ",
-    key: "tags",
-    dataIndex: "tags",
-  },
-  {
-    title: "ID",
-    key: "tara",
-    dataIndex: "tara",
-  },
-  {
-    title: "",
-    key: "action",
-    render: (_, record) => (
-      <a>
-        <DeleteOutlined />
-      </a>
-    ),
-  },
-];
 
-const data: DataType[] = [
-  {
-    key: "1",
-    name: "John Brown",
-    age: "32",
-    address: "New York No. 1 Lake Park",
-    tags: "nike",
-    tara: "12353"
-  },
-  {
-    key: "2",
-    name: "Jim Green",
-    age: "42",
-    address: "London No. 1 Lake Park",
-    tags: "loser",
-    tara: "12353"
-  },
-  {
-    key: "3",
-    name: "Joe Black",
-    age: "32",
-    address: "Sydney No. 1 Lake Park",
-    tags: "cool",
-    tara: "12353"
-  },
-];
-export default function Customer() {
+
+export default function Customer({onChangeCustomer}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  const [customers, setCustomers] = useState<TypeCustomer[]>([]);
+  const [customersTemp, setCustomersTemp] = useState<TypeCustomer[]>([]);
+  const [customersSelected, setCustomersSelected] = useState<TypeCustomer[]>([]);
+  const [searchCustomer, setSearchCustomer] = useState("");
+
+  const columns: TableProps<TypeCustomer>["columns"] = [
+    {
+      title: "ID",
+      dataIndex: "customer_code",
+      key: "customer_code",
+      render: (text: string) => <a>{text}</a>,
+    },{
+      title: "Tên khách hàng",
+      key: "customer_name",
+      dataIndex: "customer_name",
+    },{
+      title: "Nhóm khách hàng",
+      dataIndex: "customer_group",
+      key: "customer_group",
+    },{
+      title: "Địa chỉ",
+      key: "customer_primary_address",
+      dataIndex: "customer_primary_address",
+    },{
+      title: "",
+      key: "action",
+      render: (_, record) => (
+        <a>
+          <DeleteOutlined onClick={() => handleDeleteCustomer(record)}/>
+        </a>
+      ),
+    },
+  ];
+
+  useEffect(() => {
+    initDataCustomer();
+  }, []);
+
+  useEffect(() => {
+    let customerFilter = customersTemp;
+    if(searchCustomer != null && searchCustomer != ""){
+      customerFilter = customersTemp.filter(x => x.customer_name.toLowerCase().includes(searchCustomer.toLowerCase()));
+    }
+    setCustomers(customerFilter);
+  }, [searchCustomer]);
+
+  const initDataCustomer = async () => {
+    let dataCustomer = [
+      {
+        'key': "Nguyễn huệ",
+        'name': "Nguyễn huệ",
+        'customer_code': "BH0054807122022",
+        'customer_name': "Nguyễn huệ",
+        'customer_group': "Hệ thống siêu thị",
+        'customer_primary_address': ""
+      },{
+        'key': "Anh Huy",
+        'name': "Anh Huy",
+        'customer_code': "BH0057724022023",
+        'customer_name': "Anh Huy",
+        'customer_group': "Hệ thống siêu thị",
+        'customer_primary_address': "CT1, Cổ Nhuế 2, Bắc Từ Liêm, Hà Nội-Billing-4"
+      },{
+        'key': "Anh Trọng",
+        'name': "Anh Trọng",
+        'customer_code': "BH0051611082022",
+        'customer_name': "Anh Trọng",
+        'customer_group': "Khách hàng mua buôn",
+        'customer_primary_address': "Ngõ 135 Vũ Tông Phan, Khương Đình, Thanh Xuân, Hà Nội, Việt Nam-Billing"
+      }
+    ]
+    setCustomers(dataCustomer);
+    setCustomersTemp(dataCustomer);
+  }
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -95,10 +109,30 @@ export default function Customer() {
     setIsModalOpen(false);
   };
 
+  const onChangeSearchCustomer = (event) => {
+    setSearchCustomer(event.target.value);
+  }
+
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    console.log("selectedRowKeys changed: ", newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
+
+  const handleAddCustomer = () => {
+    let customerSelecteds: TypeCustomer[] = [];
+    for(let i = 0; i < selectedRowKeys.length; i++ ){
+      let customerFilter = customers.filter(x => x.name == selectedRowKeys[i]);
+      if(customerFilter != null && customerFilter.length > 0) customerSelecteds.push(customerFilter[0]);
+    }
+    setCustomersSelected(customerSelecteds);
+    onChangeCustomer(customerSelecteds);
+    handleCancel();
+  }
+
+  const handleDeleteCustomer = (item) => {
+    const updatedCustomerSelected = customersSelected.filter(customer => customer.name !== item.name);
+    setCustomersSelected(updatedCustomerSelected);
+    onChangeCustomer(updatedCustomerSelected);
+  }
 
   const rowSelection = {
     selectedRowKeys,
@@ -122,7 +156,7 @@ export default function Customer() {
           <p className="text-sm font-bold text-[#1877F2]">Chọn khách hàng</p>
         </div>
         <div className="pt-6 ml-4">
-          <TableCustom columns={columns} dataSource={data} />;
+          <TableCustom columns={columns} dataSource={customersSelected} />;
         </div>
         <Modal
           width={990}
@@ -134,8 +168,8 @@ export default function Customer() {
         >
           <div className="flex items-center justify-between">
             <FormItemCustom className="w-[320px] border-none pt-4">
-              <Input
-                placeholder="Tìm kiếm sản phẩm"
+              <Input value={searchCustomer} onChange={onChangeSearchCustomer}
+                placeholder="Tìm kiếm tên khách hàng"
                 prefix={<SearchOutlined />}
               />
             </FormItemCustom>
@@ -145,14 +179,31 @@ export default function Customer() {
                   ? `Đã chọn ${selectedRowKeys.length} khách hàng`
                   : ""}
               </span>
-              <Button type="primary">Thêm</Button>
+              <Button type="primary" onClick={handleAddCustomer}>Thêm</Button>
             </div>
           </div>
           <div className="pt-4">
             <TableCustom
               rowSelection={rowSelection}
-              columns={columns}
-              dataSource={data}
+              columns={[{
+                title: "ID",
+                dataIndex: "customer_code",
+                key: "customer_code",
+                render: (text: string) => <a>{text}</a>,
+              },{
+                title: "Tên khách hàng",
+                key: "customer_name",
+                dataIndex: "customer_name",
+              },{
+                title: "Nhóm khách hàng",
+                dataIndex: "customer_group",
+                key: "customer_group",
+              },{
+                title: "Địa chỉ",
+                key: "customer_primary_address",
+                dataIndex: "customer_primary_address",
+              }]}
+              dataSource={customers}
             />
           </div>
         </Modal>
