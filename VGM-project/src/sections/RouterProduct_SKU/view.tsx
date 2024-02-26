@@ -1,6 +1,6 @@
 import { LuUploadCloud } from "react-icons/lu";
 import { VscAdd } from "react-icons/vsc";
-import { FormItemCustom, HeaderPage } from "../../components";
+import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -104,6 +104,10 @@ export default function Product_SKU() {
   const [urlImageCheckProductResult, setUrlImageCheckProductResult] = useState("");
   const [resultProductCheck, setResultProductCheck] = useState([]);
   const [isModelResultProduct, setIsModelResultProduct] = useState(false);
+  const [isModalAddProductFromERP, setIsModalAddProductFromERP] = useState(false);
+  const [searchProductFromERP,setSearchProductFromERP] = useState("");
+  const [productFromERPSelected, setProductFromERPSelected] = useState<any[]>([]);
+  const [productFromERP, setProductFromERP] = useState<any[]>([]);
 
 
   const propUploadAddProducts: UploadProps = {
@@ -197,10 +201,10 @@ export default function Product_SKU() {
       title: "Tên sản phẩm",
       dataIndex: "product_name",
     },
-    {
-      title: "Danh mục",
-      dataIndex: "category_name",
-    },
+    // {
+    //   title: "Danh mục",
+    //   dataIndex: "category_name",
+    // },
     {
       title: "Action",
       key: "action",
@@ -658,6 +662,46 @@ export default function Product_SKU() {
     imgWindow?.document.write(image.outerHTML);
   };
 
+  const handleAddProductFromERP = () =>{
+    setIsModalAddProductFromERP(true);
+  }
+
+  const handleCancelAddProductFromERP = () => {
+    setIsModalAddProductFromERP(false);
+  }
+
+  const handleSearchProductFromERP = (event)=>{
+    setSearchProductFromERP(event.target.value);
+  }
+
+  useEffect(() => {
+    //Goi dich vu san pham tu erp theo tu khoa
+  },[searchProductFromERP])
+
+  const hasSelected = productFromERPSelected.length > 0;
+  const onSelectChangeCategory = (newSelectedRowKeys: React.Key[], selectedRow: TypeCategory[]) => {
+    setProductFromERPSelected(selectedRow);
+  };
+
+  const rowSelectionProductFromERP = {
+    productFromERPSelected,
+    onChange: onSelectChangeCategory,
+  };
+
+  useEffect(() => {
+    initDataProductFromERP();
+  },[]);
+
+  const initDataProductFromERP = () => {
+    //Goi dich vu lay danh sach san pham tu erp
+    setProductFromERP([]);
+  }
+
+  const handleSaveProductFromERP = () => {
+    //Goi dich vu luu san pham tu erp
+    console.log(productFromERPSelected);
+  }
+
   return (
     <>
       <HeaderPage
@@ -677,6 +721,13 @@ export default function Product_SKU() {
             icon: <LuUploadCloud className="text-xl" />,
             size: "20px",
             className: "flex items-center mr-2",
+          },
+          {
+            label: "Thêm sản phẩm từ ERP",
+            icon: <VscAdd className="text-xl"/>,
+            size: "20px",
+            className: "flex items-center mr-2",
+            action: handleAddProductFromERP
           },
           {
             label: "Kiểm tra sản phẩm",
@@ -806,6 +857,35 @@ export default function Product_SKU() {
                 ]} pagination={false} />
         </div>
       </Modal>
+
+      <Modal
+          width={990}
+          title="Thêm sản phẩm từ ERP"
+          open={isModalAddProductFromERP}
+          onCancel={handleCancelAddProductFromERP}
+          footer={false}
+        >
+          <div className="flex items-center justify-between">
+            <FormItemCustom className="w-[320px] border-none pt-4">
+              <Input value={searchProductFromERP} onChange={handleSearchProductFromERP}
+                placeholder="Tìm kiếm sản phẩm"
+                prefix={<SearchOutlined />}
+              />
+            </FormItemCustom>
+            <div>
+              <span style={{ marginRight: 8 }}>
+                {hasSelected ? `Đã chọn ${productFromERPSelected.length} danh mục` : ""}
+              </span>
+              <Button type="primary" onClick={handleSaveProductFromERP}>Thêm</Button>
+            </div>
+          </div>
+          <div className="pt-4">
+            <TableCustom rowSelection={rowSelectionProductFromERP} columns={[
+                { title: "Danh mục sản phẩm", dataIndex: "category_name", key: "category_name" },
+                { title: "Số lượng sản phẩm", dataIndex: "product_num", key: "product_num" },
+              ]} dataSource={productFromERP} />
+          </div>
+        </Modal>
 
       <Modal
         title={"Thêm mới sản phẩm"}
