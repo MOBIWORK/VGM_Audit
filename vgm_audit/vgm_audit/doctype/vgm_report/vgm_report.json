@@ -18,7 +18,9 @@
   "longitude_check_out",
   "latitude_check_out",
   "report_sku",
-  "categories"
+  "categories",
+  "images",
+  "images_time"
  ],
  "fields": [
   {
@@ -86,11 +88,21 @@
    "fieldname": "categories",
    "fieldtype": "JSON",
    "label": "Categories"
+  },
+  {
+   "fieldname": "images",
+   "fieldtype": "Attach Image",
+   "label": "Images"
+  },
+  {
+   "fieldname": "images_time",
+   "fieldtype": "Datetime",
+   "label": "Images Time"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-20 09:01:31.957304",
+ "modified": "2024-02-27 07:19:01.647007",
  "modified_by": "Administrator",
  "module": "VGM-Audit",
  "name": "VGM_Report",
