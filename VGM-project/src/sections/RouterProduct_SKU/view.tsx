@@ -484,7 +484,7 @@ export default function Product_SKU() {
     for(let i = 0; i < arrImage.length; i++){
       let objImage = {
         'uid': i,
-        'url': import.meta.env.VITE_BASE_URL + arrImage[i],
+        'url': arrImage[i], //import.meta.env.VITE_BASE_URL
         'url_base': arrImage[i]
       }
       arrImageEdit.push(objImage);
@@ -624,7 +624,7 @@ export default function Product_SKU() {
         if(res.message[item.product_name] != null) item.product_count = res.message[item.product_name];
       })
     }
-    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? import.meta.env.VITE_BASE_URL+fileUploadCheckProduct[0].file_url : "");
+    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? fileUploadCheckProduct[0].file_url : "");  //import.meta.env.VITE_BASE_URL+
     setResultProductCheck(arrProductDetect);
     setIsModelResultProduct(true);
     handleCancelCheckProduct();
