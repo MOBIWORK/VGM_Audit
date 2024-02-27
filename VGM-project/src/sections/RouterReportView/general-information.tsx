@@ -1,4 +1,4 @@
-import { Col, Input, Select } from "antd";
+import { Col, Input, Select,Upload } from "antd";
 import { useState,useEffect } from "react";
 import RowCustom from "../RouterCreate/styled";
 import { FormItemCustom } from "../../components";
@@ -20,8 +20,11 @@ export const statusOption: Options[] = [
 ];
 export default function GeneralInformation({ form,recordData }) {
   const { getFieldDecorator } = form;
+  const [fileList, setFileList] = useState<UploadFile[]>([ 
+  ]);
   useEffect(() => {
     if (recordData) {
+      let arrimage = []
       form.setFieldsValue({
         store: recordData.campaign_code,
         campaign_name: recordData.campaign_name,
@@ -29,8 +32,17 @@ export default function GeneralInformation({ form,recordData }) {
         date_check_out: recordData.date_check_out,
         employee_code: recordData.employee_code,
         quatity: "3",
+       
         // Gán giá trị cho các trường khác nếu cần
       });
+      arrimage.push(
+        {
+          uid: '-1',
+          name: 'image.png',
+          status: 'done',
+          url: import.meta.env.VITE_BASE_URL + JSON.parse(recordData.detail[0].images)[0],
+        },)
+        setFileList(arrimage)
     }
   }, [recordData]);
   return (
@@ -69,6 +81,17 @@ export default function GeneralInformation({ form,recordData }) {
           <Col span={12}>
             <FormItemCustom label="Số lượng danh mục sản phẩm" name="quatity" required>
               <Input />
+            </FormItemCustom>
+          </Col>
+        </RowCustom>
+        <RowCustom className="pt-2">
+        <Col span={12}>
+            <FormItemCustom label="Hình ảnh"  name="image" required>
+            <Upload
+        listType="picture-card"
+        fileList={fileList}
+      >
+      </Upload>
             </FormItemCustom>
           </Col>
         </RowCustom>

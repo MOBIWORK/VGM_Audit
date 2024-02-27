@@ -86,7 +86,8 @@ export default function ReportDetail() {
           return {
             ...item,
             key: item.name,
-            stt: index+1
+            stt: index+1,
+            quantity_cate:'2'
           }
         })
         setDataReport(dataReport);

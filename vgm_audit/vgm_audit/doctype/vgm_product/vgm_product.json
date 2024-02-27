@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "hash",
  "creation": "2024-02-19 08:58:43.041326",
@@ -58,7 +59,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-21 16:05:55.845212",
+ "modified": "2024-02-24 09:26:31.199906",
  "modified_by": "Administrator",
  "module": "VGM-Audit",
  "name": "VGM_Product",

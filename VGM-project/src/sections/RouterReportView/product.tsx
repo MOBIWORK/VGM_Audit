@@ -84,9 +84,9 @@ export default function Product(props) {
     { title: "Tên sản phẩm", dataIndex: "name_product" },
     { title: "Số lượng sản phẩm máy chấm", dataIndex: "sum_product" },
     { title: "Ảnh trưng bày", dataIndex: "image",  render: (image) => (
-      <a>
-        {JSON.parse(image)}
-      </a>
+      <a >
+      Xem ảnh
+    </a>
     ), },
 ];
 // Các cột cho bảng chính
