@@ -11,9 +11,13 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: `../my_app/public/vgm_project`,
+    outDir: `../vgm_audit/public/vgm_project`,
     emptyOutDir: true,
     target: 'es2021',
+    rollupOptions: {
+	input: {
+		main: path.resolve(__dirname, 'index.html')			}
+	},
     commonjsOptions: {
       include: [/tailwind.config.js/, /node_modules/],
     },

@@ -1,0 +1,13 @@
+{
+  "name": "vgm_audit",
+  "version": "1.0.0",
+  "description": "VGM",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cd ./VGM-project && npm run build" 
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
