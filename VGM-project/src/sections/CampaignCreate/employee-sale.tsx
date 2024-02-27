@@ -83,36 +83,17 @@ export default function EmployeeSell({onChangeEmployees}) {
   }, [searchEmployee]);
 
   const initDataEmployee = async () => {
-    console.log("vào đây");
     let urlEmployee = "/api/method/mbw_service_v2.api.ess.employee.get_list_employee";
     let res = await AxiosService.get(urlEmployee);
-    console.log(urlEmployee);
-    console.log(res);
-    let arrEmployee: TypeEmployee[] = [
-      {
-        "email": "hoanganh@gmail.com",
-        "name": "HR-EMP-00014",
-        "employee_name": "Hoàng Anh"
-      },{
-        "email": "hapt@mbw.vn",
-        "name": "HR-EMP-00013",
-        "employee_name": "Hà PT"
-      },{
-        "email": "lamthatnhanh111@gmail.com",
-        "name": "HR-EMP-00012",
-        "employee_name": "Vương Linh"
-      },{
-        "email": "haudang130197@gmail.com",
-        "name": "HR-EMP-00011",
-        "employee_name": "Đặng Hậu"
-      }
-    ]
-    let arrEmployeeSource = arrEmployee.map((item: TypeEmployee) => {
-      return {
-        ...item,
-        key: item.name
-      }
-    });
+    let arrEmployeeSource = [];
+    if(res != null && res.result != null && res.result.data != null){
+      arrEmployeeSource = res.result.data.map((item: TypeEmployee) => {
+        return {
+          ...item,
+          key: item.name
+        }
+      });
+    }
     setEmployees(arrEmployeeSource);
     setEmployeesTemp(arrEmployeeSource);
   }

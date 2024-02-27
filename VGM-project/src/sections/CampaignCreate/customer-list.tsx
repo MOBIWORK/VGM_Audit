@@ -6,6 +6,7 @@ import {
 import { FormItemCustom, TableCustom } from "../../components";
 import { Button, Input, Modal, TableProps } from "antd";
 import { useEffect, useState } from "react";
+import { AxiosService } from "../../services/server";
 
 interface TypeCustomer {
   key: React.Key;
@@ -93,6 +94,9 @@ export default function Customer({onChangeCustomer}) {
         'customer_primary_address': "Ngõ 135 Vũ Tông Phan, Khương Đình, Thanh Xuân, Hà Nội, Việt Nam-Billing"
       }
     ]
+    let urlCustomer = "/api/method/mbw_dms.api.selling.customer.list_customer";
+    let res = await AxiosService.get(urlCustomer);
+    console.log(res);
     setCustomers(dataCustomer);
     setCustomersTemp(dataCustomer);
   }
