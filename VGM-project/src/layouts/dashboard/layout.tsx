@@ -80,7 +80,13 @@ export default function DashboardLayout({ children }: Props) {
         collapsible
         collapsed={collapsed}
       >
-        <div className="demo-logo-vertical" />
+        <div className="container_logo">
+          <img src="../src/assets/logo.png" className="icon_logo"/>
+          <div className="icon_text">
+            <div className="title_text">NEXT GEN</div>
+            <div className="description_text">MOBIWORK</div>
+          </div>
+        </div>
        <MenuLeft/>
       </Sider>
       <Layout>

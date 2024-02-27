@@ -6,7 +6,7 @@ import {
 import { FormItemCustom, TableCustom } from "../../components";
 import { Button, Input, Modal, TableProps } from "antd";
 import { useEffect, useState } from "react";
-import { AxiosServiceMBW } from "../../services/server";
+import { AxiosService, AxiosServiceMBW } from "../../services/server";
 
 interface TypeEmployee{
   key?: React.Key;
@@ -85,7 +85,7 @@ export default function EmployeeSell({onChangeEmployees}) {
   const initDataEmployee = async () => {
     console.log("vào đây");
     let urlEmployee = "/api/method/mbw_service_v2.api.ess.employee.get_list_employee";
-    let res = await AxiosServiceMBW.get(urlEmployee);
+    let res = await AxiosService.get(urlEmployee);
     console.log(urlEmployee);
     console.log(res);
     let arrEmployee: TypeEmployee[] = [

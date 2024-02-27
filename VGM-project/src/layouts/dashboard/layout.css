@@ -7,3 +7,22 @@
 body {
     font-size: 12px;
 }
+.container_logo{
+    display:flex;
+    align-items: center;
+    margin-left: 10px;
+}
+.icon_logo{
+    width: 55px;
+    height: 55px;
+}
+.icon_text{
+    margin-left: 0px;
+}
+.title_text{
+    color: #637381;
+    margin-bottom: 2px;
+}
+.description_text{
+    color: #25AAE2;
+}
