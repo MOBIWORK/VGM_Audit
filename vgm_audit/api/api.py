@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 from deepvision import DeepVision
 from deepvision.service import ProductCountService
 from datetime import datetime
+from vgm_audit.api.common import (post_images)
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def deleteListByDoctype(*args,**kwargs): 
@@ -108,11 +109,14 @@ def record_report_data(*args, **kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'
     date_check_in = int(kwargs.get('date_check_in'))
     date_check_out = int(kwargs.get('date_check_out'))
+    images_time = int(kwargs.get('images_time'))
     
     date_check_in = datetime.fromtimestamp(date_check_in).strftime(date_format_with_time)
     date_check_out = datetime.fromtimestamp(date_check_out).strftime(date_format_with_time)
+    images_time = datetime.fromtimestamp(images_time).strftime(date_format_with_time)
     category = json.loads(kwargs.get('category'))
     categories_str = json.dumps(category)  # Chuyển đổi danh sách thành chuỗi JSON
+    
     try:
         data = {
             'doctype': 'VGM_Report',
@@ -122,6 +126,8 @@ def record_report_data(*args, **kwargs):
             'categories': categories_str,
             'date_check_in' : date_check_in,
             'date_check_out' : date_check_out,
+            'images_time': images_time,
+            'images': '',
             'latitude_check_in': '',
             'latitude_check_out': '',
             'longitude_check_in': '',
@@ -129,6 +135,11 @@ def record_report_data(*args, **kwargs):
         }
         doc = frappe.get_doc(data)
         doc.insert()
+        
+        report_images = kwargs.get("images")
+        name_image = doc.name
+        url_images = post_images(name_image, report_images, "VGM_Report", doc.name)
+        frappe.set_value('VGM_Report', doc.name, 'images', url_images)
 
         report_sku_json = kwargs.get('report_sku')
          #Thêm các trường vào doctype con VGM_ReportDetailSKU
@@ -143,8 +154,8 @@ def record_report_data(*args, **kwargs):
                     recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
                     base_url = frappe.utils.get_request_site_address()
                     collection_name = item.get('category')
-                    image_ai = item.get('images')
-                    image_path = base_url + image_ai[0]
+                    image_ai = url_images
+                    image_path = base_url + image_ai
                     product_id = item.get('product')
                     get_product_name =  frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
                     response = recognition.count(collection_name, image_path)

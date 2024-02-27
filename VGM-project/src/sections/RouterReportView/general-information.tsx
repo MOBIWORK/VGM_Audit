@@ -31,17 +31,19 @@ export default function GeneralInformation({ form,recordData }) {
         date_check_in: recordData.date_check_in,
         date_check_out: recordData.date_check_out,
         employee_code: recordData.employee_code,
-        quatity: "3",
+        quatity: recordData.quantity_cate,
        
         // Gán giá trị cho các trường khác nếu cần
       });
-      arrimage.push(
-        {
-          uid: '-1',
-          name: 'image.png',
+      for(let i = 0; i < JSON.parse(recordData.detail[0].images).length; i++) {
+        let obj = {
+          uid : i,
+          name: 'image.png'+ i.toString(),
           status: 'done',
-          url: import.meta.env.VITE_BASE_URL + JSON.parse(recordData.detail[0].images)[0],
-        },)
+          url: import.meta.env.VITE_BASE_URL + JSON.parse(recordData.detail[0].images)[i]
+        }
+        arrimage.push(obj)
+      }
         setFileList(arrimage)
     }
   }, [recordData]);

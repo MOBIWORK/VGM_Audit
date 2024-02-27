@@ -212,6 +212,7 @@ export default function ReportDetail() {
       //setLoading(true);
       let urlReport = '/api/method/vgm_audit.api.api.get_list_reports';
       const response = await AxiosService.get(urlReport);
+      console.log(response);
       // Kiểm tra xem kết quả từ API có chứa dữ liệu không
       if (response && response.message.data) {
         //Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
@@ -220,7 +221,7 @@ export default function ReportDetail() {
             ...item,
             key: item.name,
             stt: index+1,
-            quantity_cate:'2'
+            quantity_cate:JSON.parse(item.categories).length.toString() 
           }
         })
         setDataReport(dataReport);
