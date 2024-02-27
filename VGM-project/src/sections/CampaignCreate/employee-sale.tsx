@@ -83,8 +83,11 @@ export default function EmployeeSell({onChangeEmployees}) {
   }, [searchEmployee]);
 
   const initDataEmployee = async () => {
-    let urlEmployee = "api/method/mbw_service_v2.api.ess.employee.get_list_employee";
-    //let res = await AxiosServiceMBW.get(urlEmployee);
+    console.log("vào đây");
+    let urlEmployee = "/api/method/mbw_service_v2.api.ess.employee.get_list_employee";
+    let res = await AxiosServiceMBW.get(urlEmployee);
+    console.log(urlEmployee);
+    console.log(res);
     let arrEmployee: TypeEmployee[] = [
       {
         "email": "hoanganh@gmail.com",

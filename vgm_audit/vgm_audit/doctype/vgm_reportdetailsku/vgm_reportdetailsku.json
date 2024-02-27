@@ -9,8 +9,7 @@
  "field_order": [
   "category",
   "product",
-  "sum_product",
-  "images"
+  "sum_product"
  ],
  "fields": [
   {
@@ -27,11 +26,6 @@
    "label": "Sum Product"
   },
   {
-   "fieldname": "images",
-   "fieldtype": "JSON",
-   "label": "Images"
-  },
-  {
    "fieldname": "category",
    "fieldtype": "Link",
    "label": "Category",
@@ -41,7 +35,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-20 09:04:20.356121",
+ "modified": "2024-02-27 07:16:51.994419",
  "modified_by": "Administrator",
  "module": "VGM-Audit",
  "name": "VGM_ReportDetailSKU",
