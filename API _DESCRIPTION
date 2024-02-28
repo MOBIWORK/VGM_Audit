@@ -2,7 +2,7 @@ API:
 -Product: (add,edit) API FRAPPE with image(json): ['/file/...']
 
     + delete Product  METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.deleteListByDoctype param:{'doctype': 'name_doctype', items : stringtify['1','2']}
-    + import_product METHOD : GET => url:{{domain}}/api/method/vgm_audit.api.api.import_product param:{}
+    + import_product METHOD : GET => url:{{domain}}/api/method/vgm_audit.api.api.import_product param:{stringtify list:[{product_code:"",product_name:""}], "category" : "5439ebcea2"}
 - checkImageExist METHOD : POST  => url: {{domain}}/api/method/vgm_audit.api.api.checkImageProductExist param: {
     "collection_name" : "5439ebcea2",
     "linkimages": "/files/ca_trung_400g.jpg"
@@ -16,11 +16,13 @@ API:
     "category" : "[\"5439ebcea2\",\"5439ebcea2\"]",
     "date_check_in": "1708570011",
     "date_check_out": "1708570011",
+    "images_time": "1708570011",
+    "images": base64 // string
     "latitude_check_in":"",
     "latitude_check_out":"",
     "longitude_check_in":"",
     "longitude_check_out":"",
-    "report_sku": "[{\"category\": \"5439ebcea2\",\"images\": [\"/files/ca_trung_gianhang.jpg\"],\"product\": \"5f45a9ea51\"}]"
+    "report_sku": "[{\"category\": \"5439ebcea2\",\"product\": \"5f45a9ea51\"}]"
 }
 - search_vgm_reports METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.search_vgm_reports param: {
     "campaign_code" : "12aed3e4",
