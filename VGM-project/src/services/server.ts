@@ -44,7 +44,8 @@ AxiosService.interceptors.response.use(
     
     // Any status code that lie within the range of 2xx cause this function to trigger
     // Do something with response data
-    console.log(response);
+    console.log(response, response.data);
+    console.log(typeof(response));
     return response.data;
   },
   function (error) {
