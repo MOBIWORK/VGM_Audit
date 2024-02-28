@@ -252,3 +252,24 @@ def get_list_reports():
     except Exception as e:
         # Trả về thông báo lỗi nếu có lỗi xảy ra
         return {"status": "fail", "message": _("Failed to retrieve VGM Reports with campaign names: {0}").format(str(e))}
+
+@frappe.whitelist(methods=["POST"], allow_guest=True)
+def import_product(*args, **kwargs):
+    try:
+        list_products = json.loads(kwargs.get('listproduct'))
+
+        for product_data in list_products:
+            new_product = frappe.new_doc('VGM_Product')
+            new_product.product_name = product_data.get('product_name', '')
+            new_product.product_code = product_data.get('product_code', '')
+            new_product.barcode = product_data.get('barcode', '')
+            new_product.product_description = product_data.get('product_description', '')
+            new_product.category = kwargs.get('category')
+            url_images = product_data.get('url_images', [])
+            new_product.images = json.dumps(url_images)
+
+            new_product.insert()
+
+        return {'status': 'success', 'message': 'Products imported successfully'}
+    except Exception as e:
+        return {'status': 'failed', 'message': str(e)}

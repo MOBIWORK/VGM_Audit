@@ -42,7 +42,7 @@ class VGM_Product(Document):
                 json_string = self.images
                 images_dict = json.loads(json_string)
                 base_url = frappe.utils.get_request_site_address()
-                image_paths = [base_url + value for value in images_dict]
+                image_paths = [base_url + value if 'http' not in value else value for value in images_dict]
                 image_ids = []
                 for value in images_dict:
                     image_id = str(uuid.uuid4())
@@ -63,24 +63,29 @@ class VGM_Product(Document):
         product_name = self.product_name
         json_string = self.images
         images_dict = json.loads(json_string)
-        base_url = frappe.utils.get_request_site_address()
-        image_paths = [base_url + value for value in images_dict]
-        collection_name = self.category
-        product_id = str(uuid.uuid4())
-        # Khởi tạo danh sách để chứa các image_ids
-        image_ids = []
-        for value in images_dict:
-            # Sinh ra một UUID và chuyển thành chuỗi, sau đó thêm vào danh sách image_ids
-            image_id = str(uuid.uuid4())
-            image_ids.append(image_id)
-        # Lấy danh sách sản phẩm
-        products: Products = product_recognition.get_products()
+        
+        # Kiểm tra xem images_dict có phần tử không
+        if images_dict:
+            base_url = frappe.utils.get_request_site_address()
+            image_paths = [base_url + value if 'http' not in value else value for value in images_dict]
+            collection_name = self.category
+            product_id = str(uuid.uuid4())
+            # Khởi tạo danh sách để chứa các image_ids
+            image_ids = []
+            for value in images_dict:
+                # Sinh ra một UUID và chuyển thành chuỗi, sau đó thêm vào danh sách image_ids
+                image_id = str(uuid.uuid4())
+                image_ids.append(image_id)
+            # Lấy danh sách sản phẩm
+            products: Products = product_recognition.get_products()
 
-        # Thực hiện thêm sản phẩm và xử lý kết quả
-        response = products.add(collection_name, product_id, product_name, image_ids, image_paths)
-        if response.get('status') == 'completed':
-            product_AI = response.get('result', {}).get('product_id')
-            custom_field_value = json.dumps({"product_id": product_AI})
-            self.set('custom_field', custom_field_value)
+            # Thực hiện thêm sản phẩm và xử lý kết quả
+            response = products.add(collection_name, product_id, product_name, image_ids, image_paths)
+            if response.get('status') == 'completed':
+                product_AI = response.get('result', {}).get('product_id')
+                custom_field_value = json.dumps({"product_id": product_AI})
+                self.set('custom_field', custom_field_value)
+            else:
+                frappe.msgprint("Không phân tích được ảnh")
         else:
-            frappe.msgprint("Không phân tích được ảnh")
+            return {'status': 'fail','message' : self.name}

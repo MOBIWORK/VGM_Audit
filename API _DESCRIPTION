@@ -2,7 +2,7 @@ API:
 -Product: (add,edit) API FRAPPE with image(json): ['/file/...']
 
     + delete Product  METHOD : POST => url:{{domain}}/api/method/vgm_audit.api.api.deleteListByDoctype param:{'doctype': 'name_doctype', items : stringtify['1','2']}
-    + import_product METHOD : GET => url:{{domain}}/api/method/vgm_audit.api.api.import_product param:{stringtify list:[{product_code:"",product_name:""}], "category" : "5439ebcea2"}
+    + import_product METHOD : GET => url:{{domain}}/api/method/vgm_audit.api.api.import_product param:{stringtify listproduct:[{product_code:"",barcode:"",product_name:"",product_description:"",url_images:["https://dmsimages.mobiwork.vn/viewimage?url=Files/578c51a637bb7e7c121fcb50/Images/1653037721225.jpg",...]}], "category" : "5439ebcea2"}
 - checkImageExist METHOD : POST  => url: {{domain}}/api/method/vgm_audit.api.api.checkImageProductExist param: {
     "collection_name" : "5439ebcea2",
     "linkimages": "/files/ca_trung_400g.jpg"
