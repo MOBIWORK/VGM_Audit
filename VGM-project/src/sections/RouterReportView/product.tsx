@@ -74,11 +74,27 @@ export default function Product(props) {
     }
     return <Table columns={columns} dataSource={data} pagination={false} />;
   };
-  const mainTableData = props.recordData?.category_names.map((category, index) => ({
-    key: index.toString(),
-    stt: (index + 1).toString(),
-    categoryName: Object.values(category)[0]
-  }));
+  const sumProductByCategory = {};
+
+  // Tính tổng sum_product cho từng danh mục
+  props.recordData?.detail.forEach(detailItem => {
+      const categoryCode = detailItem.category;
+      const sumProduct = parseInt(detailItem.sum_product);
+  
+      // Kiểm tra và cập nhật tổng sum_product cho từng danh mục
+      sumProductByCategory[categoryCode] = (sumProductByCategory[categoryCode] || 0) + sumProduct;
+  });
+  
+  // Xây dựng dữ liệu cho mainTableData và number_product
+  const mainTableData = props.recordData?.category_names.map((category, index) => {
+      const categoryCode = Object.keys(category)[0];
+      return {
+          key: index.toString(),
+          stt: (index + 1).toString(),
+          categoryName: Object.values(category)[0],
+          number_product: sumProductByCategory[categoryCode] || 0 // Sử dụng tổng sum_product của danh mục
+      };
+  });
   const expandedColumns = [
     { title: "STT", dataIndex: "stt" },
     { title: "Tên sản phẩm", dataIndex: "name_product" },
@@ -92,7 +108,8 @@ export default function Product(props) {
 // Các cột cho bảng chính
 const mainColumns = [
   { title: "STT", dataIndex: "stt" },
-  { title: "Danh mục sản phẩm", dataIndex: "categoryName" }
+  { title: "Danh mục sản phẩm", dataIndex: "categoryName" },
+  { title: "Số lượng sản phẩm", dataIndex: "number_product" }
 ];
 // Xây dựng dữ liệu mở rộng cho mỗi danh mục sản phẩm
 const expandedRowData = props.recordData?.category_names.map((category, index) => {
