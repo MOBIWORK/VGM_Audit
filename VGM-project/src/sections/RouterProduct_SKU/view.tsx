@@ -241,7 +241,7 @@ export default function Product_SKU() {
       }
       const response = await AxiosService.get(urlCategory);
       // Kiểm tra xem kết quả từ API có chứa dữ liệu không
-      console.log(response)
+      console.log(response);
       if (response && response.data) {
         // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
         let dataCategories: TypeCategory[] = response.data.map((item: TypeCategory) => {
