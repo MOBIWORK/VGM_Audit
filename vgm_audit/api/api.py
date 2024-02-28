@@ -169,7 +169,7 @@ def record_report_data(*args, **kwargs):
                        'parenttype': doc.doctype,
                        'category': item.get('category'),
                        'sum_product': count_value,
-                       'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
+                    #    'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
                        'product': product_id
                     })
                     child_doc.insert()

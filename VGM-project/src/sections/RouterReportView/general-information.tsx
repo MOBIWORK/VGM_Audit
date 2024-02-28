@@ -35,15 +35,14 @@ export default function GeneralInformation({ form,recordData }) {
        
         // Gán giá trị cho các trường khác nếu cần
       });
-      for(let i = 0; i < JSON.parse(recordData.detail[0].images).length; i++) {
         let obj = {
-          uid : i,
-          name: 'image.png'+ i.toString(),
+          uid : -1,
+          name: 'image.png',
           status: 'done',
-          url: import.meta.env.VITE_BASE_URL + JSON.parse(recordData.detail[0].images)[i]
+          url: import.meta.env.VITE_BASE_URL + recordData.images
         }
         arrimage.push(obj)
-      }
+      
         setFileList(arrimage)
     }
   }, [recordData]);
