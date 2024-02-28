@@ -58,6 +58,15 @@ interface TypeProduct{
   product_name: string;
   product_description: string;
 }
+interface TypeProductFromERP{
+  key: React.Key;
+  name: string;
+  image: string;
+  description: string;
+  item_code: string;
+  item_group: string;
+  item_name: string
+}
 
 import type { GetProp } from "antd";
 
@@ -206,7 +215,7 @@ export default function Product_SKU() {
     //   dataIndex: "category_name",
     // },
     {
-      title: "Action",
+      title: "Hành động",
       key: "action",
       render: (_, record) => (
         <Space size="middle">
@@ -234,14 +243,12 @@ export default function Product_SKU() {
     try {
       //setLoading(true);
       let urlCategory = '/api/resource/VGM_Category?fields=["*"]';
-      console.log(searchCategory);
       if(searchCategory != null && searchCategory != ""){
         let filterComand = `[["category_name", "like", "%${searchCategory}%"]]`;
         urlCategory += `&filters=${filterComand}`;
       }
       const response = await AxiosService.get(urlCategory);
       // Kiểm tra xem kết quả từ API có chứa dữ liệu không
-      console.log(response);
       if (response && response.data) {
         // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
         let dataCategories: TypeCategory[] = response.data.map((item: TypeCategory) => {
@@ -680,27 +687,63 @@ export default function Product_SKU() {
   },[searchProductFromERP])
 
   const hasSelected = productFromERPSelected.length > 0;
-  const onSelectChangeCategory = (newSelectedRowKeys: React.Key[], selectedRow: TypeCategory[]) => {
+  const onSelectChangeProductERP = (newSelectedRowKeys: React.Key[], selectedRow: TypeProductFromERP[]) => {
     setProductFromERPSelected(selectedRow);
   };
 
   const rowSelectionProductFromERP = {
     productFromERPSelected,
-    onChange: onSelectChangeCategory,
+    onChange: onSelectChangeProductERP,
   };
 
   useEffect(() => {
     initDataProductFromERP();
   },[]);
 
-  const initDataProductFromERP = () => {
+  const initDataProductFromERP = async () => {
     //Goi dich vu lay danh sach san pham tu erp
-    setProductFromERP([]);
+    let url = "api/method/mbw_dms.api.selling.product.list_product"
+    let res = await AxiosService.get(url);
+    let arrProductERPSource = [];
+    if(res != null && res.result != null && res.result.data != null){
+      arrProductERPSource = res.result.data.map((item: TypeProductFromERP) => {
+        return {
+          ...item,
+          key: item.name
+        }
+      });
+    }
+    setProductFromERP(arrProductERPSource);
   }
 
-  const handleSaveProductFromERP = () => {
+  const handleSaveProductFromERP = async () => {
     //Goi dich vu luu san pham tu erp
-    console.log(productFromERPSelected);
+    let arrProductPost = [];
+    for(let i = 0; i < productFromERPSelected.length; i++){
+      let itemProduct = {
+        'product_code': productFromERPSelected[i].item_code,
+        'barcode': productFromERPSelected[i].item_code,
+        'product_name': productFromERPSelected[i].item_name,
+        'product_description': productFromERPSelected[i].description,
+        'url_images': productFromERPSelected[i].image != null && productFromERPSelected[i].image != ""? [productFromERPSelected[i].image] : []
+      }
+      arrProductPost.push(itemProduct);
+    }
+    let dataPost = {
+      'listproduct': JSON.stringify(arrProductPost),
+      'category': categorySelected.name
+    }
+    let urlPostData = "/api/method/vgm_audit.api.api.import_product";
+    let res = await AxiosService.post(urlPostData, dataPost);
+    console.log(res);
+    if(res != null && res.message != null && res.message.status == "success"){
+      message.success("Thêm mới thành công");
+      setProductFromERPSelected([]);
+      initDataProductByCategory();
+      handleCancelAddProductFromERP();
+    }else{
+      message.error("Thêm mới thất bại");
+    }
   }
 
   return (
@@ -781,7 +824,7 @@ export default function Product_SKU() {
             <div className="py-3">
               <FormItemCustom className="w-full border-none" name="filter_category">
                 <Input onChange={onChangeFilterCategory} value={searchCategory}
-                  placeholder="Tìm kiếm mục danh"
+                  placeholder="Tìm kiếm danh mục"
                   prefix={<SearchOutlined />}
                 />
               </FormItemCustom>
@@ -829,7 +872,7 @@ export default function Product_SKU() {
         ]}
       >
         <p className="text-[#637381] font-normal text-sm">
-          Chọn ảnh sản phẩm bát kì để kiểm tra nhận diện sản phẩm
+          Chọn ảnh sản phẩm bất kì để kiểm tra nhận diện sản phẩm
         </p>
         <Dragger {...propUploadCheckProducts}>
           <p className="ant-upload-drag-icon">
@@ -882,8 +925,9 @@ export default function Product_SKU() {
           </div>
           <div className="pt-4">
             <TableCustom rowSelection={rowSelectionProductFromERP} columns={[
-                { title: "Danh mục sản phẩm", dataIndex: "category_name", key: "category_name" },
-                { title: "Số lượng sản phẩm", dataIndex: "product_num", key: "product_num" },
+                { title: "Mã sản phẩm", dataIndex: "item_code", key: "item_code" },
+                { title: "Tên sản phẩm", dataIndex: "item_name", key: "item_name" },
+                { title: "Danh mục", dataIndex: "item_group", key: "item_group" }
               ]} dataSource={productFromERP} />
           </div>
         </Modal>
@@ -905,7 +949,7 @@ export default function Product_SKU() {
       >
         <div className="pt-4">
           <Form layout="vertical" form={formAddProduct}>
-            <FormItemCustom label="Mã sản phâm" name="product_code" required>
+            <FormItemCustom label="Mã sản phẩm" name="product_code" required>
               <Input />
             </FormItemCustom>
             <FormItemCustom
@@ -982,7 +1026,7 @@ export default function Product_SKU() {
       >
         <div className="pt-4">
           <Form layout="vertical" form={formEditProduct}>
-            <FormItemCustom label="Mã sản phâm" name="product_code" required>
+            <FormItemCustom label="Mã sản phẩm" name="product_code" required>
               <Input />
             </FormItemCustom>
             <FormItemCustom

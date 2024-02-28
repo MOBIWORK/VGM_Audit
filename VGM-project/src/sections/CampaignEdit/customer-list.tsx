@@ -6,6 +6,7 @@ import {
   import { FormItemCustom, TableCustom } from "../../components";
   import { Button, Input, Modal, TableProps } from "antd";
   import { useEffect, useState } from "react";
+import { AxiosService } from "../../services/server";
   
   interface TypeCustomer {
     key: React.Key;
@@ -69,35 +70,22 @@ import {
     }, [searchCustomer]);
   
     const initDataCustomer = async () => {
-      let dataCustomer = [
-        {
-          'key': "Nguyễn huệ",
-          'name': "Nguyễn huệ",
-          'customer_code': "BH0054807122022",
-          'customer_name': "Nguyễn huệ",
-          'customer_group': "Hệ thống siêu thị",
-          'customer_primary_address': ""
-        },{
-          'key': "Anh Huy",
-          'name': "Anh Huy",
-          'customer_code': "BH0057724022023",
-          'customer_name': "Anh Huy",
-          'customer_group': "Hệ thống siêu thị",
-          'customer_primary_address': "CT1, Cổ Nhuế 2, Bắc Từ Liêm, Hà Nội-Billing-4"
-        },{
-          'key': "Anh Trọng",
-          'name': "Anh Trọng",
-          'customer_code': "BH0051611082022",
-          'customer_name': "Anh Trọng",
-          'customer_group': "Khách hàng mua buôn",
-          'customer_primary_address': "Ngõ 135 Vũ Tông Phan, Khương Đình, Thanh Xuân, Hà Nội, Việt Nam-Billing"
-        }
-      ]
-      setCustomers(dataCustomer);
-      setCustomersTemp(dataCustomer);
+      let urlCustomer = "/api/method/mbw_dms.api.selling.customer.list_customer";
+      let res = await AxiosService.get(urlCustomer);
+      let arrCustomerSource = [];
+      if(res != null && res.message == "ok"){
+        arrCustomerSource = res.result.data.map((item: TypeCustomer) => {
+          return {
+            ...item,
+            key: item.name
+          }
+        });
+      }
+      setCustomers(arrCustomerSource);
+      setCustomersTemp(arrCustomerSource);
       let customersInitSelected = [];
       for(let i = 0; i < customerEdit.length; i++){
-        let dataCustomerFilter = dataCustomer.filter(x => x.name==customerEdit[i]);
+        let dataCustomerFilter = arrCustomerSource.filter(x => x.name==customerEdit[i]);
         if(dataCustomerFilter != null && dataCustomerFilter.length > 0){
             //selectedRowKeys.push(customerEdit[i]);
             customersInitSelected.push(dataCustomerFilter[0]);

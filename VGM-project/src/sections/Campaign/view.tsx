@@ -59,7 +59,7 @@ export default function Campaign() {
       render: (date) => moment(date).format('DD/MM/YYYY')
     },
     {
-      title: "Action",
+      title: "Hành động",
       key: "action",
       render: (_, record) => (
         <Space size="middle">

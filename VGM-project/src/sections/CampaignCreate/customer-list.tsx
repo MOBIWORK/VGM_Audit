@@ -70,35 +70,19 @@ export default function Customer({onChangeCustomer}) {
   }, [searchCustomer]);
 
   const initDataCustomer = async () => {
-    let dataCustomer = [
-      {
-        'key': "Nguyễn huệ",
-        'name': "Nguyễn huệ",
-        'customer_code': "BH0054807122022",
-        'customer_name': "Nguyễn huệ",
-        'customer_group': "Hệ thống siêu thị",
-        'customer_primary_address': ""
-      },{
-        'key': "Anh Huy",
-        'name': "Anh Huy",
-        'customer_code': "BH0057724022023",
-        'customer_name': "Anh Huy",
-        'customer_group': "Hệ thống siêu thị",
-        'customer_primary_address': "CT1, Cổ Nhuế 2, Bắc Từ Liêm, Hà Nội-Billing-4"
-      },{
-        'key': "Anh Trọng",
-        'name': "Anh Trọng",
-        'customer_code': "BH0051611082022",
-        'customer_name': "Anh Trọng",
-        'customer_group': "Khách hàng mua buôn",
-        'customer_primary_address': "Ngõ 135 Vũ Tông Phan, Khương Đình, Thanh Xuân, Hà Nội, Việt Nam-Billing"
-      }
-    ]
     let urlCustomer = "/api/method/mbw_dms.api.selling.customer.list_customer";
     let res = await AxiosService.get(urlCustomer);
-    console.log(res);
-    setCustomers(dataCustomer);
-    setCustomersTemp(dataCustomer);
+    let arrCustomerSource = [];
+    if(res != null && res.message == "ok"){
+      arrCustomerSource = res.result.data.map((item: TypeCustomer) => {
+        return {
+          ...item,
+          key: item.name
+        }
+      });
+    }
+    setCustomers(arrCustomerSource);
+    setCustomersTemp(arrCustomerSource);
   }
 
   const showModal = () => {

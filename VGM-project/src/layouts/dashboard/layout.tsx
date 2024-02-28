@@ -81,7 +81,7 @@ export default function DashboardLayout({ children }: Props) {
         collapsed={collapsed}
       >
         <div className="container_logo">
-          <img src="../src/assets/logo.png" className="icon_logo"/>
+          <img src="./vgm_project/logo.png" className="icon_logo"/>
           <div className="icon_text">
             <div className="title_text">NEXT GEN</div>
             <div className="description_text">MOBIWORK</div>
