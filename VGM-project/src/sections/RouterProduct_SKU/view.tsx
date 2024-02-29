@@ -73,6 +73,7 @@ import type { GetProp } from "antd";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 export default function Product_SKU() {
+  
   const [selectionType, setSelectionType] = useState<"checkbox" | "radio">(
     "checkbox"
   );

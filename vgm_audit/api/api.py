@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 from deepvision import DeepVision
 from deepvision.service import ProductCountService
 from datetime import datetime
-from vgm_audit.api.common import (post_images)
+from vgm_audit.api.common import (post_images,post_images_check)
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def deleteListByDoctype(*args,**kwargs): 
@@ -44,9 +44,9 @@ def checkImageProductExist(*args,**kwargs):
     recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
     base_url = frappe.utils.get_request_site_address()
     collection_name = kwargs.get('collection_name')
-    linkimages = kwargs.get('linkimages')
-    
-    image_path = base_url + linkimages
+    image_base64 = kwargs.get('linkimages')
+    # url_images = post_images_check(image_base64)
+    image_path = [base_url + linkimages]
     # product_id = self.product
     # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
     response = recognition.count(collection_name, image_path)
@@ -55,7 +55,7 @@ def checkImageProductExist(*args,**kwargs):
         return count_value
         # self.set('sum', count_value)
     else:
-        return {"status": "error"}
+        return {"status": "error", 'message': response}
         # self.set('sum', self.sum)
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 # param {collection_name: ''}
@@ -166,7 +166,7 @@ def record_report_data(*args, **kwargs):
                         base_url = frappe.utils.get_request_site_address()
                         collection_name = category_id
                         image_ai = url_images
-                        image_path = base_url + image_ai
+                        image_path = [base_url + image_ai]
                         
                         get_product_name = frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
                         response = recognition.count(collection_name, image_path)

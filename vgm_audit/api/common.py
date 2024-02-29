@@ -28,3 +28,10 @@ def post_images(name_image, images, doc_type, doc_name):
     delete_file(path_file)
     file_url = doc_file.get('file_url')
     return file_url
+def post_images_check(images):
+    file_name = str(uuid.uuid4()) + ".png"
+    imgdata = base64.b64decode(images)
+    doc_file = save_file(file_name, imgdata,'File','',folder=None, decode=False, is_private=0, df=None)
+    file_url = doc_file.get('file_url')
+    return file_url
+
