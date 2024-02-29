@@ -4,7 +4,17 @@
 	Method: POST
 	DataPost: 
 		{'customer_code' : "BH0123111122" , "e_name": "HR-EMP-00014"}
-   
+
+** API upload file ảnh trưng bày gian hàng
+	Url: {{domain}}/api/method/upload_file
+	Method: POST
+	DataPost:
+		{
+			"file": (Dạng binary),
+			"is_private": 0,
+			"folder": "Home"
+		}
+
 ** API tạo báo cáo bằng chụp ảnh gian hàng
 	Url: {{domain}}/api/method/vgm_audit.api.api.record_report_data
 	Method: POST
@@ -15,7 +25,7 @@
 			"campaign_code": "12aed3e4ec",
 			"category" : "[\"5439ebcea2\",\"5439ebcea2\"]",
 			"images_time": "1708570011",
-			"images": base64 // string
+			"images": "/files/858da12c-1558-4c0f-8aec-8e3f20f66221.png" //Đường dẫn ảnh dịch vụ upload file trả về
 		}
 
 	
