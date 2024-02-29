@@ -20,10 +20,9 @@ export const statusOption: Options[] = [
 ];
 export default function GeneralInformationCampaignEdit({ form, statusCampaign, onCampaignStatusChange }) {
   const [campaignStatus, setCampaignStatus] = useState("Open");
-
+ 
   useEffect(() => {
     setCampaignStatus(statusCampaign);
-    console.log(statusCampaign);
   }, [statusCampaign]);
 
   const setValCampaignStatus = (val) => {

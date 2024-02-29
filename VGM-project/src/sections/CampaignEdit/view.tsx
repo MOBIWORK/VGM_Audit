@@ -37,7 +37,8 @@ export default function CampaignEdit() {
             'campaign_name': res.data.campaign_name,
             'campaign_description': res.data.campaign_description,
             'campaign_start': convertDateFormat(res.data.start_date),
-            'campaign_end': convertDateFormat(res.data.end_date)
+            'campaign_end': convertDateFormat(res.data.end_date),
+             campaign_status: res.data.campaign_status
         })
         setStatusCampaignEdit(res.data.campaign_status);
         setCategoryEdit(JSON.parse(res.data.products));
