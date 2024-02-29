@@ -252,14 +252,19 @@ export default function Product_SKU() {
       // Kiểm tra xem kết quả từ API có chứa dữ liệu không
       if (response && response.data) {
         // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
-        let dataCategories: TypeCategory[] = response.data.map((item: TypeCategory) => {
+        let dataCategories: TypeCategory[] = response.data.map((item: TypeCategory, index: number) => {
           return {
             ...item,
             key: item.name,
-            hidden: true
+            hidden: true,
+            selected: index === 0
           }
         })
         setCategories(dataCategories);
+        // Chọn danh mục đầu tiên mặc định
+        if (dataCategories.length > 0) {
+              setCategorySelected(dataCategories[0]);
+        }
       }
     } catch (error) {
     } finally {
@@ -395,6 +400,15 @@ export default function Product_SKU() {
   //Các hàm xử lý danh sách sản phẩm
   const handleSelectedCategory = (item) => {
     setCategorySelected(item);
+    setCategories(prevCategories => 
+        prevCategories.map(category => {
+            if (category.key === item.key) {
+                return { ...category, selected: true };
+            } else {
+                return { ...category, selected: false };
+            }
+        })
+    );
   }
 
   useEffect(() => {
@@ -435,6 +449,12 @@ export default function Product_SKU() {
   };
 
   const showModalAddProduct = () => {
+    formAddProduct.resetFields();
+    setFileList([])
+    let barcode = document.getElementById("barcode");
+    if(barcode){
+      barcode.innerHTML = "";
+    }
     if(categorySelected != null && categorySelected.name != null){
       setIsModalOpenAddProduct(true);
     }
@@ -736,7 +756,6 @@ export default function Product_SKU() {
     }
     let urlPostData = "/api/method/vgm_audit.api.api.import_product";
     let res = await AxiosService.post(urlPostData, dataPost);
-    console.log(res);
     if(res != null && res.message != null && res.message.status == "success"){
       message.success("Thêm mới thành công");
       setProductFromERPSelected([]);
@@ -836,7 +855,9 @@ export default function Product_SKU() {
               bordered={false}
               dataSource={categories}
               renderItem={(item: any) => (
-                <List.Item onMouseEnter={(event) => handleMouseEnterCategory(event, item)}
+                <List.Item 
+                className={`${item.selected ? 'selected' : ''}`}
+                 onMouseEnter={(event) => handleMouseEnterCategory(event, item)}
                  onMouseLeave={(event) => handleMouseLeaveCategory(event, item)}
                  onClick={() => handleSelectedCategory(item)}>
                   <div className={"item_category"}>
