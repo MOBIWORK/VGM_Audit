@@ -11,6 +11,12 @@ from deepvision import DeepVision
 from deepvision.service import ProductCountService
 from datetime import datetime
 from vgm_audit.api.common import (post_images,post_images_check)
+from frappe.utils.file_manager import (
+    save_file
+)
+import base64
+import threading
+
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def deleteListByDoctype(*args,**kwargs): 
@@ -71,7 +77,7 @@ def deleteCategory(*args,**kwargs):
         return {"status": "success"}   
     else:
         return {"status": "error"}
-    
+
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 def get_campaign_info(*args,**kwargs):
     """
@@ -107,12 +113,8 @@ def get_campaign_info(*args,**kwargs):
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 def record_report_data(*args, **kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'
-    date_check_in = int(kwargs.get('date_check_in'))
-    date_check_out = int(kwargs.get('date_check_out'))
     images_time = int(kwargs.get('images_time'))
     
-    date_check_in = datetime.fromtimestamp(date_check_in).strftime(date_format_with_time)
-    date_check_out = datetime.fromtimestamp(date_check_out).strftime(date_format_with_time)
     images_time = datetime.fromtimestamp(images_time).strftime(date_format_with_time)
     category = json.loads(kwargs.get('category'))
     categories_str = json.dumps(category)  # Chuyển đổi danh sách thành chuỗi JSON
@@ -124,8 +126,6 @@ def record_report_data(*args, **kwargs):
             'employee_code': kwargs.get('e_name'),
             'campaign_code': kwargs.get('campaign_code'),
             'categories': categories_str,
-            'date_check_in' : date_check_in,
-            'date_check_out' : date_check_out,
             'images_time': images_time,
             'images': '',
             'latitude_check_in': '',
@@ -135,11 +135,17 @@ def record_report_data(*args, **kwargs):
         }
         doc = frappe.get_doc(data)
         doc.insert()
-        
-        report_images = kwargs.get("images")
-        name_image = doc.name
-        url_images = post_images(name_image, report_images, "VGM_Report", doc.name)
-        frappe.set_value('VGM_Report', doc.name, 'images', url_images)
+
+        process_report_sku_thread = threading.Thread(target=process_report_sku, args=(doc.name, kwargs.get("images")))
+        process_report_sku_thread.start()
+        return {'status': 'success', "result" : doc.name}
+    except Exception as e:
+        return {'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))}
+
+def process_report_sku(name, report_images):
+    try:
+        #url_images = post_images(name, report_images, "VGM_Report", name)
+        frappe.set_value('VGM_Report', name, 'images', report_images)
         
         products_by_category = []
         for category_id in category:
@@ -165,7 +171,7 @@ def record_report_data(*args, **kwargs):
                         recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
                         base_url = frappe.utils.get_request_site_address()
                         collection_name = category_id
-                        image_ai = url_images
+                        image_ai = report_images
                         image_path = [base_url + image_ai]
                         
                         get_product_name = frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
@@ -175,9 +181,9 @@ def record_report_data(*args, **kwargs):
                         else:
                             count_value = 0
                         child_doc.update({
-                            'parent': doc.name, 
+                            'parent': name, 
                             'parentfield': 'report_sku',
-                            'parenttype': doc.doctype,
+                            'parenttype': 'VGM_Report',
                             'category': category_id,
                             'sum_product': count_value,
                             # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
@@ -185,13 +191,12 @@ def record_report_data(*args, **kwargs):
                         })
                         child_doc.insert() 
             except Exception as e:
-                return {'status': 'fail','message': _("Failed to process doctype VGM_ReportDetailSKU: {0}").format(str(e))}
+                print({'status': 'fail','message': _("Failed to process doctype VGM_ReportDetailSKU: {0}").format(str(e))})
         else:
-            return {'status': 'fail', 'message': _("No data provided for report_sku")}
-        return {'status': 'success', "result" : doc.name}
+            print({'status': 'fail', 'message': _("No data provided for report_sku")})
     except Exception as e:
-        return {'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))}
-    
+        print({'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))})
+
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 def search_vgm_reports(*args,**kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'
