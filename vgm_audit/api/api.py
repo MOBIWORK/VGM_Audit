@@ -140,39 +140,50 @@ def record_report_data(*args, **kwargs):
         name_image = doc.name
         url_images = post_images(name_image, report_images, "VGM_Report", doc.name)
         frappe.set_value('VGM_Report', doc.name, 'images', url_images)
-
-        report_sku_json = kwargs.get('report_sku')
-         #Thêm các trường vào doctype con VGM_ReportDetailSKU
-        if report_sku_json:
+        
+        products_by_category = []
+        for category_id in category:
+            # Truy vấn các sản phẩm có category tương ứng
+            products_in_category = frappe.get_all("VGM_Product", filters={"category": category_id}, fields=["name"])
+            # Lấy danh sách tên sản phẩm
+            product_names = [product.name for product in products_in_category]
+            # Thêm danh sách tên sản phẩm vào từ điển theo category
+            products_by_category.append({"category_id": category_id, "products": product_names})
+        
+        #Thêm các trường vào doctype con VGM_ReportDetailSKU
+        if products_by_category:
             try:
-                report_sku_data = json.loads(report_sku_json)
-                for item in report_sku_data:
-                    child_doc = frappe.new_doc('VGM_ReportDetailSKU')
-                    # AI đếm số lượng sản phẩm trong ảnh
-                    RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
-                    deep_vision: DeepVision = DeepVision()
-                    recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
-                    base_url = frappe.utils.get_request_site_address()
-                    collection_name = item.get('category')
-                    image_ai = url_images
-                    image_path = base_url + image_ai
-                    product_id = item.get('product')
-                    get_product_name =  frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
-                    response = recognition.count(collection_name, image_path)
-                    if response.get('status') == 'completed':
-                        count_value = response.get('result', {}).get('count', {}).get(get_product_name)
-                    else:
-                        count_value = 0
-                    child_doc.update({
-                       'parent': doc.name, 
-                       'parentfield': 'report_sku',
-                       'parenttype': doc.doctype,
-                       'category': item.get('category'),
-                       'sum_product': count_value,
-                    #    'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
-                       'product': product_id
-                    })
-                    child_doc.insert()
+                for category_data in products_by_category:
+                    category_id = category_data["category_id"]
+                    product_ids = category_data["products"]
+
+                    for product_id in product_ids:
+                        child_doc = frappe.new_doc('VGM_ReportDetailSKU')
+                        # AI đếm số lượng sản phẩm trong ảnh
+                        RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
+                        deep_vision: DeepVision = DeepVision()
+                        recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
+                        base_url = frappe.utils.get_request_site_address()
+                        collection_name = category_id
+                        image_ai = url_images
+                        image_path = base_url + image_ai
+                        
+                        get_product_name = frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
+                        response = recognition.count(collection_name, image_path)
+                        if response.get('status') == 'completed':
+                            count_value = response.get('result', {}).get('count', {}).get(get_product_name)
+                        else:
+                            count_value = 0
+                        child_doc.update({
+                            'parent': doc.name, 
+                            'parentfield': 'report_sku',
+                            'parenttype': doc.doctype,
+                            'category': category_id,
+                            'sum_product': count_value,
+                            # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
+                            'product': product_id
+                        })
+                        child_doc.insert() 
             except Exception as e:
                 return {'status': 'fail','message': _("Failed to process doctype VGM_ReportDetailSKU: {0}").format(str(e))}
         else:

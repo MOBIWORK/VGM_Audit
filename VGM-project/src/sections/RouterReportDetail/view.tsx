@@ -292,6 +292,7 @@ export default function ReportDetail() {
                 onClick: () => handleRowClick(record), // Gọi hàm xử lý khi click vào dòng
               };
             }}
+            rowHoverBg="#f0f0f0" // Màu nền mong muốn khi hover
           />
         </div>
       </div>
