@@ -127,7 +127,7 @@ def record_report_data(*args, **kwargs):
             'campaign_code': kwargs.get('campaign_code'),
             'categories': categories_str,
             'images_time': images_time,
-            'images': '',
+            'images': kwargs.get("images"),
             'latitude_check_in': '',
             'latitude_check_out': '',
             'longitude_check_in': '',
@@ -135,34 +135,38 @@ def record_report_data(*args, **kwargs):
         }
         doc = frappe.get_doc(data)
         doc.insert()
-
-        process_report_sku_thread = threading.Thread(target=process_report_sku, args=(doc.name, kwargs.get("images")))
+        print("Dòng 138", frappe.get_all("VGM_Product"))
+        process_report_sku_thread = threading.Thread(target=process_report_sku, args=(doc.name, kwargs.get("images"), category, frappe))
         process_report_sku_thread.start()
-        return {'status': 'success', "result" : doc.name}
+        return {'status': 'success', "result" : doc}
     except Exception as e:
         return {'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))}
 
-def process_report_sku(name, report_images):
+def process_report_sku(name, report_images, category, frappe):
     try:
-        #url_images = post_images(name, report_images, "VGM_Report", name)
-        frappe.set_value('VGM_Report', name, 'images', report_images)
-        
         products_by_category = []
+        print("Dòng 148", category)
+        print("Dòng 150", frappe.get_all("VGM_Product"))
         for category_id in category:
             # Truy vấn các sản phẩm có category tương ứng
+            print("Dòng 151", category_id)
+            print("Dòng 152", frappe.get_all("VGM_Product"))
             products_in_category = frappe.get_all("VGM_Product", filters={"category": category_id}, fields=["name"])
+            print("Dòng 152", products_in_category)
             # Lấy danh sách tên sản phẩm
             product_names = [product.name for product in products_in_category]
             # Thêm danh sách tên sản phẩm vào từ điển theo category
             products_by_category.append({"category_id": category_id, "products": product_names})
         
+        print("Dòng 156", products_by_category)
         #Thêm các trường vào doctype con VGM_ReportDetailSKU
         if products_by_category:
             try:
+                print("Dòng 162", products_by_category)
                 for category_data in products_by_category:
                     category_id = category_data["category_id"]
                     product_ids = category_data["products"]
-
+                    print("call api", product_ids)
                     for product_id in product_ids:
                         child_doc = frappe.new_doc('VGM_ReportDetailSKU')
                         # AI đếm số lượng sản phẩm trong ảnh
